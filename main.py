@@ -15,7 +15,7 @@ from telegram.ext import (
                         filters,
                         CallbackContext)
 from functools import wraps
-from database_management import *
+import database_management
 
 # Bot Token
 BOT_TOKEN : Final = "7378006253:AAEZ_n9VQ3x3uLxG2uNzxIL2Ikc9rkj9cHc"
@@ -48,23 +48,24 @@ def restricted(func):
     return wrapped
 
 # Telegram Bot's Handler
-DATE, TIME, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PICTURE = range(8) # To handle telegram bot state
-trade_records = [] # To record trades
+DATE, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO = range(9) # To handle telegram bot state
+
 
 # Handlers
 # Start handler
+@restricted
 async def start_handler(update: Update, context:ContextTypes.DEFAULT_TYPE):
     text = """
-        Welcome to trading journal bot.\nPlease send your trade information with below order:
-        1.Date
-        2.Time
-        3.Win/Loss
-        4.Side(Long/Short)
-        5.RR
-        6.PNL
-        7.Strategy
-        
-        Please enter the Date (YYYY-MM-DD):
+Welcome to trading journal bot.\nPlease send your trade information with below order:
+1.Date
+2.Time
+3.Win/Loss
+4.Side(Long/Short)
+5.RR
+6.PNL
+7.Strategy
+
+Please enter the Date (YYYY-MM-DD):
         """
     try:
         await context.bot.send_message(
@@ -105,9 +106,26 @@ async def time_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             reply_to_message_id=update.effective_message.id,
-            text="Now Please send Position's Status(Win/Loss)."
+            text="What is Ticker's Name?"
         )
     except:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"An error occurred: {str(e)}",
+            reply_to_message_id=update.effective_message.id,
+        )
+    return TICKER
+
+async def ticker_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
+    try:
+        # Collect ticker_name
+        context.user_data['ticker_name'] = update.message.text
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            reply_to_message_id=update.effective_message.id,
+            text="Trade's Result? (Win/Loss)"
+        )
+    except Exception as e:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=f"An error occurred: {str(e)}",
@@ -122,7 +140,7 @@ async def win_loss_trade_handler(update:Update, context:ContextTypes.DEFAULT_TYP
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             reply_to_message_id=update.effective_message.id,
-            text="Now Please send Trade's Side."
+            text="Now Please send Trade's Side.(Short/Long)"
         )
     except Exception as e:
         await context.bot.send_message(
@@ -191,20 +209,38 @@ async def strategy_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             reply_to_message_id=update.effective_message.id,
-            text="Trade has been successfully recorded."
+            text="Now Please Send Picture."
         )
+    except Exception as e:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"An error occurred: {str(e)}",
+            reply_to_message_id=update.effective_message.id,
+        )
+    return PHOTO
 
-        trade = {
-            'date': context.user_data['date'],
-            'time': context.user_data['time'],
-            'win_loss': context.user_data['win_loss'],
-            'side': context.user_data['side'],
-            'rr': context.user_data['rr'],
-            'pnl': context.user_data['pnl'],
-            'strategy': context.user_data['strategy']
-        }
-        # Calling save_trade function from database_management
-        save_trade(trade)
+async def picture_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
+    try:
+        context.user_data['photo'] = update.effective_message.photo[-1].file_id
+        # Call save_trade function to record data in database
+        database_management.save_trade(
+            date= context.user_data['date'], 
+            time= context.user_data['time'], 
+            ticker = context.user_data['ticker_name'],
+            win_loss= context.user_data['win_loss'], 
+            side= context.user_data['side'], 
+            rr= context.user_data['rr'], 
+            pnl= context.user_data['pnl'],
+            strategy= context.user_data['strategy'], 
+            picture= context.user_data['photo'])
+
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            reply_to_message_id=update.effective_message.id,
+            text="Recorded Succesfully."
+        )
+        
+
     except Exception as e:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
@@ -212,6 +248,7 @@ async def strategy_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
             reply_to_message_id=update.effective_message.id,
         )
     return ConversationHandler.END
+
 
 # Cancel conversation
 def cancel_handler(update: Update, context: CallbackContext) -> int:
@@ -236,6 +273,11 @@ if __name__ == '__main__':
                     filters.TEXT & ~filters.COMMAND, time_handler
                 )
             ],
+            TICKER:[
+                MessageHandler(
+                    filters.TEXT & ~filters.COMMAND, ticker_handler
+                )
+            ],
             WIN_LOSS: [
                 MessageHandler(
                     filters.TEXT & ~filters.COMMAND, win_loss_trade_handler
@@ -258,9 +300,14 @@ if __name__ == '__main__':
             ],
             STRATEGY: [
                 MessageHandler(
-                    filters.TEXT & filters.COMMAND, strategy_handler
+                    filters.TEXT & ~filters.COMMAND, strategy_handler
                 )
             ],
+            PHOTO: [
+                MessageHandler(
+                    filters.PHOTO & ~filters.COMMAND, picture_handler
+                )
+            ]
             },
             fallbacks=[
                 CommandHandler("cancel", cancel_handler),
