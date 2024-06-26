@@ -317,3 +317,10 @@ if __name__ == '__main__':
     )
     # Running Bot
     app.run_polling()
+
+
+
+# TODO:
+# 1. Add a way to cancel a trade and return to main menu
+# 2. Try to find a way to handle recording using InlineKeyboard. (Try within simple scenario ex 2 methods.)
+# 3.
