@@ -1,85 +1,17 @@
-import logging
-import os
-from typing import Final
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import (
+                    Update, 
+                    InlineKeyboardButton,
+                    InlineKeyboardMarkup
+    )
 from telegram.ext import (
-    Application, CommandHandler, MessageHandler, ConversationHandler, 
-    CallbackQueryHandler, ContextTypes, filters
-)
-from functools import wraps
+            ConversationHandler, 
+            ContextTypes
+    )
 import database_management
-from datetime import datetime
 
 
-BOT_TOKEN: Final = "7378006253:AAEZ_n9VQ3x3uLxG2uNzxIL2Ikc9rkj9cHc"
-# Logging setup
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Admin user IDs
-LIST_OF_ADMINS = [44557320]  # Consider moving this to a configuration file
-
-#Stages
-ADD_TRADE_ROUTE, PRE_TRADE_ROUTE = range(2)
 # Conversation states
 INIT, DATE, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO, SAVE = range(11)
-
-def restricted(func):
-    """
-    Decorator to restrict access to certain functions to admin users only.
-    """
-    @wraps(func)
-    async def wrapped(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
-        user_id = update.effective_user.id
-        if user_id not in LIST_OF_ADMINS:
-            logger.warning(f"Unauthorized access denied for {user_id}.")
-            await update.message.reply_text("Access denied")
-            return
-        return await func(update, context, *args, **kwargs)
-    return wrapped
-
-@restricted
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Send message on `/start`."""
-    # Get user that sent /start and log his name
-    user = update.message.from_user
-    logger.info("User %s started the conversation.", user.first_name)
-    # Build InlineKeyboard where each button has a displayed text
-    # and a string as callback_data
-    # The keyboard is a list of button rows, where each row is in turn
-    # a list.
-
-    keyboard = [
-        [
-            InlineKeyboardButton("Add New Trade", callback_data='add_new_trade'),
-            InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades'),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    # Send message with text and appended InlineKeyboard
-    await update.message.reply_text("Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
-    return INIT
-
-async def start_over(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Prompt same text & keyboard as `start` does but not as new message"""
-    # Get CallbackQuery from Update
-    query = update.callback_query
-    # CallbackQueries need to be answered, even if no notification to the user is needed
-    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
-    await query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("Add New Trade", callback_data='add_new_trade'),
-            InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades'),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    # Instead of sending a new message, edit the message that
-    # originated the CallbackQuery. This gives the feeling of an
-    # interactive menu.
-    await query.edit_message_text(text="Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
-    return INIT
-
 
 async def new_trade_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -251,5 +183,4 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Cancels the current trade recording process.
     """
     await update.message.reply_text('Trade recording cancelled.')
-    logger.info(f"Trade recording cancelled by user {update.effective_user.id}")
     return ConversationHandler.END
