@@ -1,17 +1,25 @@
 import logging
-import os
+import database_management
+from os import environ
+from dotenv import load_dotenv
+from functools import wraps
 from typing import Final
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
-    Application, CommandHandler, MessageHandler, ConversationHandler, 
-    CallbackQueryHandler, ContextTypes, filters
+    Application, 
+    CommandHandler, 
+    MessageHandler, 
+    ConversationHandler, 
+    CallbackQueryHandler, 
+    ContextTypes, 
+    filters
 )
-from functools import wraps
-import database_management
-from datetime import datetime
 
 
-BOT_TOKEN: Final = "7378006253:AAEZ_n9VQ3x3uLxG2uNzxIL2Ikc9rkj9cHc"
+
+# Importing BOT_TOKEN
+load_dotenv()
+BOT_TOKEN : Final = environ["BOT_TOKEN"]
 # Logging setup
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
