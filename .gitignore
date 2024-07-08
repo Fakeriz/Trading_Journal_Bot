@@ -7,6 +7,7 @@ db_test.py
 main2.py
 # C extensions
 *.so
+TODO.txt
 
 # Distribution / packaging
 .Python
