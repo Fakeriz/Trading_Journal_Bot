@@ -141,7 +141,15 @@ def main() -> None:
                     check_trades_by_status_handler, pattern='^trade_status$'
                 ),
             ],
-            DATE_RANGE : [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_date_range_input)]
+            DATE_RANGE : [MessageHandler(
+                filters.TEXT & ~filters.COMMAND, handle_date_range_input
+                )],
+            SPECIFIC_TRADE: [MessageHandler(
+                filters.TEXT & ~filters.COMMAND, handle_trades_by_id_input
+                )],
+            TICKER_NAME : [MessageHandler(
+                filters.TEXT & ~filters.COMMAND, handle_trades_by_ticker_input
+                )],
         },
         fallbacks=[CommandHandler("cancel", cancel)]
     )
