@@ -23,7 +23,6 @@ def init_db():
     except Exception as e:
         print(e)
 
-
 def save_trade(date, ticker, time, win_loss, side, rr, pnl, strategy, picture):
     """
     Save a trade record to the database.
@@ -166,7 +165,6 @@ def get_trades_by_ticker(ticker_name: str):
         }
         trade_list.append(trade_dict)
     return trade_list
-    
 
 def get_trades_by_side(side: str):
     """Retrieve and search records by trade's side (Long/Short).
@@ -219,7 +217,7 @@ def get_trades_by_status(status: str):
     query = """
         SELECT * 
         FROM trades
-        WHERE status = ?
+        WHERE win_loss = ?
         """
     c.execute(query, (status,))
     trades = c.fetchall()
