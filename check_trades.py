@@ -5,7 +5,7 @@ import database_management
 
 logger = logging.getLogger(__name__)
 
-CHECK_TRADES, DATE_RANGE, SPECIFIC_TRADE, TICKER_NAME, SIDE, STATUS = range(6)
+CHECK_TRADES, DATE_RANGE, SPECIFIC_TRADE, TICKER_NAME, SEARCH_SIDE, SEARCH_STATUS = range(6)
 
 async def start_check_trades(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -220,26 +220,115 @@ async def handle_trades_by_ticker_input(update: Update, context: ContextTypes.DE
 # CHECK TRADES BY SIDE (LONG/SHORT) - BUTTON HANDLER AND DB HANDLER
 async def check_trades_by_side_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Checking previous trades by trade's side (Buy/Sell)
+    Prompt the user to enter the trade's side (Long/Short) to fetch trades based on the side.
+
+    Args:
+        update (Update): Incoming Telegram update.
+        context (ContextTypes.DEFAULT_TYPE): Context of the Telegram update.
+    
+    Returns:
+        int: The next state in the conversation.
     """
+
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(text="Please send position's side (Long/Short).")
-    return SIDE
+
+    keyboard = [
+        [InlineKeyboardButton("Long", callback_data="Long")],
+        [InlineKeyboardButton("Short", callback_data="Short")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.edit_message_text(
+            text = "Please send position's side (Long/Short).",
+            reply_markup = reply_markup)
+    return SEARCH_SIDE
 
 async def handle_trades_by_side_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    pass
+    query = update.callback_query
+    side = query.data.split('_')[-1].capitalize()
+
+    # Fetch trades from the database by side
+    trades = database_management.get_trades_by_side(side)
+
+    if not trades:
+        await query.edit_message_text(f"No trades found for the selected side: {side}.")
+        return CHECK_TRADES
+    
+    # Send trade details to the user
+    for trade in trades:
+        caption = (
+            f"ID: {trade['id']}\n"
+            f"Date: {trade['date']}\n"
+            f"Time: {trade['time']}\n"
+            f"Ticker: {trade['ticker']}\n"
+            f"Side: {trade['side']}\n"
+            f"Status: {trade['status']}\n"
+            f"PnL: {trade['pnl']}\n"
+            f"RR: {trade['rr']}\n"
+            f"Strategy: {trade['strategy']}"
+        )
+        if trade['picture']:
+            await query.message.reply_photo(photo=trade['picture'], caption=caption)
+        else:
+            await query.message.reply_text(text=caption)
+    return ConversationHandler.END
+
 
 
 # CHECK TRADES BY TRADE STATUS (WIN/LOSS) - BUTTON HANDLER AND DB HANDLER
 async def check_trades_by_status_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Checking previous trades by trade's status (Win/Loss)
+    Prompt the user to enter the trade's status (Win/Loss) to fetch trades based on the status.
+
+    Args:
+        update (Update): Incoming Telegram update.
+        context (ContextTypes.DEFAULT_TYPE): Context of the Telegram update.
+    
+    Returns:
+        int: The next state in the conversation.
     """
+
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(text="Please send trade's status (Win/Loss).")
-    return STATUS
+
+    keyboard = [
+        [InlineKeyboardButton("Win", callback_data='Win')],
+        [InlineKeyboardButton("Loss", callback_data="Loss")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.edit_message_text(
+            text="Please send trade's status (Win/Loss).",
+            reply_markup= reply_markup)
+    return SEARCH_STATUS
 
 async def handle_trades_by_status_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    pass
+    query = update.callback_query
+    status = query.data
+
+    # Fetch trades from the database by side
+    trades = database_management.get_trades_by_status(status)
+
+    if not trades:
+        await query.edit_message_text("No trades found for the selected status.")
+        return CHECK_TRADES
+    
+    # Send trade details to the user
+    for trade in trades:
+        caption = (
+            f"ID: {trade['id']}\n"
+            f"Date: {trade['date']}\n"
+            f"Time: {trade['time']}\n"
+            f"Ticker: {trade['ticker']}\n"
+            f"Side: {trade['side']}\n"
+            f"Status: {trade['status']}\n"
+            f"PnL: {trade['pnl']}\n"
+            f"RR: {trade['rr']}\n"
+            f"Strategy: {trade['strategy']}"
+        )
+        if trade['picture']:
+            await query.message.reply_photo(photo=trade['picture'], caption=caption)
+        else:
+            await query.message.reply_text(text=caption)
+    return ConversationHandler.END
