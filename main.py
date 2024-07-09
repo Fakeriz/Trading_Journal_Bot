@@ -150,6 +150,12 @@ def main() -> None:
             TICKER_NAME : [MessageHandler(
                 filters.TEXT & ~filters.COMMAND, handle_trades_by_ticker_input
                 )],
+            SEARCH_SIDE : [CallbackQueryHandler(
+                    handle_trades_by_side_input, pattern="^Long|Short$"
+                )],
+            SEARCH_STATUS: [CallbackQueryHandler(
+                handle_trades_by_status_input, pattern="^Win|Loss$"
+            )]
         },
         fallbacks=[CommandHandler("cancel", cancel)]
     )
