@@ -147,10 +147,11 @@ def get_trades_by_ticker(ticker_name: str):
         WHERE ticker = ?
         """
     c.execute(query, (ticker_name,))
+    trades = c.fetchall()
     conn.close()
 
     trade_list = []
-    for trade in c.fetchall():
+    for trade in trades:
         trade_dict = {
             'id': trade[0],
             'date': trade[1],
@@ -165,6 +166,7 @@ def get_trades_by_ticker(ticker_name: str):
         }
         trade_list.append(trade_dict)
     return trade_list
+    
 
 def get_trades_by_side(side: str):
     """Retrieve and search records by trade's side (Long/Short).
@@ -183,10 +185,11 @@ def get_trades_by_side(side: str):
         WHERE side = ?
         """
     c.execute(query, (side,))
+    trades = c.fetchall()
     conn.close()
 
     trade_list = []
-    for trade in c.fetchall():
+    for trade in trades:
         trade_dict = {
             'id': trade[0],
             'date': trade[1],
@@ -219,10 +222,11 @@ def get_trades_by_status(status: str):
         WHERE status = ?
         """
     c.execute(query, (status,))
+    trades = c.fetchall()
     conn.close()
 
     trade_list = []
-    for trade in c.fetchall():
+    for trade in trades:
         trade_dict = {
             'id': trade[0],
             'date': trade[1],
