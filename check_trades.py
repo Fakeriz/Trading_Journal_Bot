@@ -24,6 +24,7 @@ async def start_check_trades(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await query.edit_message_text(text="How would you like to check the trades?", reply_markup=reply_markup)
     return CHECK_TRADES
 
+# CHECK TRADES BY DATE RANGE BUTTON HANDLER AND DB HANDLER
 async def check_trade_by_date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Handles checking trades by date range.
@@ -82,21 +83,141 @@ async def handle_date_range_input(update: Update, context: ContextTypes.DEFAULT_
     return ConversationHandler.END
 
 
+# CHECK TRADES BY ID BUTTON HANDLER AND DB HANDLER
 async def check_trade_by_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Prompt the user to enter a trade's unique ID to fetch the trade details.
+
+    Args:
+        update (Update): Incoming Telegram update.
+        context (ContextTypes.DEFAULT_TYPE): Context of the Telegram update.
+    
+    Returns:
+        int: The next state in the conversation.
+    """
+
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(text="Please enter trade's unique ID.")
     return SPECIFIC_TRADE
 
+async def handle_trades_by_id_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handle the input of trade ID, fetch trade details, and send them to the user.
+
+    Args:
+        update (Update): Incoming Telegram update.
+        context (ContextTypes.DEFAULT_TYPE): Context of the Telegram update.
+
+    Returns:
+        int: The end of the conversation handler.
+    """
+
+    try:
+        trade_id = int(update.message.text.strip())
+    except ValueError:
+        await update.message.reply_text(text="Wrong ID, please enger an valid number.")
+        return SPECIFIC_TRADE
+    
+    # Fetch trade details from the database by ID
+    trades = database_management.get_trades_by_id(trade_id)
+
+    if not trades:
+        await update.message.reply_text("No trades found for the specified ID.")
+        return ConversationHandler.END
+    
+    # Ensure trades is a list even if only one trade is found
+    if isinstance(trades, dict):
+        trades = [trades]
+
+    # Send trade details to the user
+    for trade in trades:
+        caption = (
+            f"ID: {trade['id']}\n"
+            f"Date: {trade['date']}\n"
+            f"Time: {trade['time']}\n"
+            f"Ticker: {trade['ticker']}\n"
+            f"Side: {trade['side']}\n"
+            f"Status: {trade['status']}\n"
+            f"PnL: {trade['pnl']}\n"
+            f"RR: {trade['rr']}\n"
+            f"Strategy: {trade['strategy']}"
+            )
+        
+        # If statement for those record without picture
+        if trade['picture']:
+            await update.message.reply_photo(photo=trade['picture'], caption=caption)
+        else:
+            await update.message.reply_text(text=caption)
+    return ConversationHandler.END
+
+
+# CHECK TRADES BY TICKER NAME - BUTTON HANDLER AND DB HANDLER
 async def check_trades_by_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Checking previous trades by ticker's name
+    Prompt the user to enter a ticker name to fetch trades associated with that ticker.
+
+    Args:
+        update (Update): Incoming Telegram update.
+        context (ContextTypes.DEFAULT_TYPE): Context of the Telegram update.
+    
+    Returns:
+        int: The next state in the conversation.
     """
+
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(text= "Please provide ticker's name.")
     return TICKER_NAME
 
+async def handle_trades_by_ticker_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handle the input of a ticker name, fetch trades associated with the ticker, and send them to the user.
+
+    Args:
+        update (Update): Incoming Telegram update.
+        context (ContextTypes.DEFAULT_TYPE): Context of the Telegram update.
+
+    Returns:
+        int: The end of the conversation handler.
+    """
+
+    try:
+        ticker_name = update.message.text.strip()
+    except ValueError:
+        await update.message.reply_text(text="Please send valid ticker name (e.g XAUUSD)")
+        return TICKER_NAME
+    
+    # Fetch trades from the database by ticker name
+    trades = database_management.get_trades_by_ticker(ticker_name)
+
+    if not trades:
+        await update.message.reply_text(f"No trades found for the specified ticker name: {ticker_name}.")
+        return ConversationHandler.END
+    
+    # Send trade details to the user
+    for trade in trades:
+        caption = (
+            f"ID: {trade['id']}\n"
+            f"Date: {trade['date']}\n"
+            f"Time: {trade['time']}\n"
+            f"Ticker: {trade['ticker']}\n"
+            f"Side: {trade['side']}\n"
+            f"Status: {trade['status']}\n"
+            f"PnL: {trade['pnl']}\n"
+            f"RR: {trade['rr']}\n"
+            f"Strategy: {trade['strategy']}"
+            )
+
+        # Send a photo if available, otherwise send text
+        if trade['picture']:
+            await update.message.reply_photo(photo=trade['picture'], caption=caption)
+        else:
+            await update.message.reply_text(text=caption)
+    return ConversationHandler.END
+
+
+# CHECK TRADES BY SIDE (LONG/SHORT) - BUTTON HANDLER AND DB HANDLER
 async def check_trades_by_side_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Checking previous trades by trade's side (Buy/Sell)
@@ -106,6 +227,11 @@ async def check_trades_by_side_handler(update: Update, context: ContextTypes.DEF
     await query.edit_message_text(text="Please send position's side (Long/Short).")
     return SIDE
 
+async def handle_trades_by_side_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pass
+
+
+# CHECK TRADES BY TRADE STATUS (WIN/LOSS) - BUTTON HANDLER AND DB HANDLER
 async def check_trades_by_status_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Checking previous trades by trade's status (Win/Loss)
@@ -114,3 +240,6 @@ async def check_trades_by_status_handler(update: Update, context: ContextTypes.D
     await query.answer()
     await query.edit_message_text(text="Please send trade's status (Win/Loss).")
     return STATUS
+
+async def handle_trades_by_status_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pass
