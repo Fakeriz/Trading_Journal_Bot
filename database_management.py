@@ -1,4 +1,6 @@
 import sqlite3
+import datetime
+
 
 # Initialize the database
 def init_db():
@@ -41,6 +43,7 @@ def save_trade(date, ticker, time, win_loss, side, rr, pnl, strategy, picture):
     Raises:
         Exception: If there is an issue saving the trade to the database.
     """
+
     try:
         # Connect to the database
         conn = sqlite3.connect('trades.db')
@@ -240,3 +243,60 @@ def get_trades_by_status(status: str):
         trade_list.append(trade_dict)
 
     return trade_list
+
+
+def get_all_tickers():
+    """
+    Fetch all unique tickers from the database.
+    
+    Returns:
+        list: A list of unique tickers.
+    """
+    try:
+        conn = sqlite3.connect('trades.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT DISTINCT ticker FROM trades")
+        tickers = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return tickers
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+        return []
+
+def get_trades_for_export(ticker, period):
+    """
+    Fetch trades for a specified ticker and period.
+    
+    Args:
+        ticker (str): The ticker symbol.
+        period (str): The period (e.g., '1D', '1W', '1M').
+    
+    Returns:
+        list: A list of trades.
+    """
+    conn = sqlite3.connect('trades.db')
+    c = conn.cursor()
+
+    # Calculate date range using timedelta
+    end_date = datetime.datetime.now() # Variable to store end date (today)
+    if period == '1D':
+        start_date = end_date - datetime.timedelta(days=1)
+    elif period == '3D':
+        start_date = end_date - datetime.timedelta(days=3)
+    elif period == '1W':
+        start_date = end_date - datetime.timedelta(weeks=1)
+    elif period == '2W':
+        start_date = end_date - datetime.timedelta(weeks=2)
+    elif period == '1M':
+        start_date = end_date - datetime.timedelta(days=10)
+    elif period == '3M':
+        start_date = end_date - datetime.timedelta(days=90)
+    elif period == '6M':
+        start_date = end_date - datetime.timedelta(days=180)
+
+    # Query to fetch trades within specified data range.
+    c.execute("SELECT * FROM trades WHERE ticker = ? AND date BETWEEN ? AND ?", (ticker, start_date, end_date))
+    trades = c.fetchall()
+    conn.close()
+    
+    return trades
