@@ -8,6 +8,7 @@ main2.py
 # C extensions
 *.so
 TODO.txt
+add_sample_records.py
 
 # Distribution / packaging
 .Python
