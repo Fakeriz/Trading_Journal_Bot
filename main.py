@@ -18,6 +18,7 @@ from functools import wraps
 from add_trade import *
 from check_trades import *
 from database_management import *
+from export_data import *
 from os import environ
 from dotenv import load_dotenv
 
@@ -59,10 +60,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # The keyboard is a list of button rows, where each row is in turn
     # a list.
     keyboard = [
-        [
-            InlineKeyboardButton("Add New Trade", callback_data='add_new_trade'),
-            InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades'),
-        ]
+            [InlineKeyboardButton("Add New Trade", callback_data='add_new_trade')],
+            [InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades')],
+            [InlineKeyboardButton("Export Data (CSV)", callback_data='export_csv')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
@@ -74,12 +74,13 @@ async def start_over(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     # CallbackQueries need to be answered, even if no notification to the user is needed
     await query.answer()
+
     keyboard = [
-        [
-            InlineKeyboardButton("Add New Trade", callback_data='add_new_trade'),
-            InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades'),
-        ]
+            [InlineKeyboardButton("Add New Trade", callback_data='add_new_trade')],
+            [InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades')],
+            [InlineKeyboardButton("Export Data (CSV)", callback_data='export_csv')]
     ]
+
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text="Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
     return INIT
@@ -95,6 +96,9 @@ def main() -> None:
                     ),
                 CallbackQueryHandler(
                     start_check_trades, pattern='^check_previous_trades$'
+                    ),
+                CallbackQueryHandler(
+                    start_export_to_csv, pattern='^export_csv$'
                     )
             ],
             WIN_LOSS: [CallbackQueryHandler(
@@ -155,6 +159,12 @@ def main() -> None:
                 )],
             SEARCH_STATUS: [CallbackQueryHandler(
                 handle_trades_by_status_input, pattern="^Win|Loss$"
+            )],
+            EXPORT_TICKER: [CallbackQueryHandler(
+                export_ticker_selected,
+            )],
+            EXPORT_PERIOD: [CallbackQueryHandler(
+                export_period_selected,
             )]
         },
         fallbacks=[CommandHandler("cancel", cancel)]
