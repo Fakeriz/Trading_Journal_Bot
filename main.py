@@ -101,6 +101,12 @@ def main() -> None:
                     start_export_to_csv, pattern='^export_csv$'
                     )
             ],
+            EXPORT_TICKER: [CallbackQueryHandler(
+                export_ticker_selected,
+            )],
+            EXPORT_PERIOD: [CallbackQueryHandler(
+                export_period_selected,
+            )],
             WIN_LOSS: [CallbackQueryHandler(
                 win_loss_handler, pattern='^(XAUUSD|EURUSD)$'
                 )],
@@ -160,12 +166,6 @@ def main() -> None:
             SEARCH_STATUS: [CallbackQueryHandler(
                 handle_trades_by_status_input, pattern="^Win|Loss$"
             )],
-            EXPORT_TICKER: [CallbackQueryHandler(
-                export_ticker_selected,
-            )],
-            EXPORT_PERIOD: [CallbackQueryHandler(
-                export_period_selected,
-            )]
         },
         fallbacks=[CommandHandler("cancel", cancel)]
     )
