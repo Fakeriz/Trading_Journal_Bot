@@ -8,16 +8,26 @@ import pandas as pd
 from io import BytesIO
 
 
-
-
 # Define states
 EXPORT_TICKER, EXPORT_PERIOD, CUSTOM_DATE_RANGE, CUSTOM_TICKER = range(17, 21)
 
-# Handlers for exporting data
+
+
 async def export_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles the initial export data request by providing options for the date period.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (EXPORT_PERIOD).
+    """
     query = update.callback_query
     await query.answer()
 
+    # Create a keyboard with options for the date period
     keyboard = [
         [InlineKeyboardButton("1 Day", callback_data='1D')],
         [InlineKeyboardButton("2 Days", callback_data='2D')],
@@ -32,13 +42,26 @@ async def export_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Ask the user to choose the date period for export
     await query.edit_message_text(
         text="Please choose the date period for export:",
         reply_markup=reply_markup
     )
     return EXPORT_PERIOD
 
+
 async def export_data_period_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles the user's selection of the date period and asks for further criteria (ticker).
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (EXPORT_TICKER or CUSTOM_DATE_RANGE).
+    """
     query = update.callback_query
     period = query.data
     context.user_data['period'] = period
@@ -46,6 +69,7 @@ async def export_data_period_handler(update: Update, context: ContextTypes.DEFAU
     await query.answer()
 
     if period == 'custom':
+        # Ask the user to enter a custom date range
         await query.message.reply_text("Please enter the custom date range (YYYY-MM-DD to YYYY-MM-DD):")
         return CUSTOM_DATE_RANGE
 
@@ -58,13 +82,25 @@ async def export_data_period_handler(update: Update, context: ContextTypes.DEFAU
     await query.message.reply_text("Do you want to export trades for a specific ticker or all trades?", reply_markup=reply_markup)
     return EXPORT_TICKER
 
+
 async def export_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles the user's selection of exporting all trades or a specific ticker.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (CUSTOM_TICKER or ConversationHandler.END).
+    """
     query = update.callback_query
     await query.answer()
 
     ticker = query.data
 
     if ticker == 'choose_ticker':
+        # Ask the user to enter the ticker name
         await query.message.reply_text("Please enter the ticker name (e.g., XAUUSD):")
         return CUSTOM_TICKER
     else:
@@ -76,7 +112,18 @@ async def export_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TY
         await query.message.reply_text("Data exported successfully.")
         return ConversationHandler.END
 
+
 async def handle_custom_ticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles the user's input for the ticker name and retrieves the trades for export.
+    
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: Ends the conversation.
+    """
     ticker = update.message.text
     period = context.user_data['period']
     start_date, end_date = get_date_range_from_period(period)
@@ -86,7 +133,18 @@ async def handle_custom_ticker(update: Update, context: ContextTypes.DEFAULT_TYP
     await update.message.reply_text("Data exported successfully.")
     return ConversationHandler.END
 
+
 async def handle_custom_date_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles the user's input for the custom date range and retrieves the trades for export.
+    
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: Ends the conversation.
+    """
     date_range = update.message.text
     try:
         start_date_str, end_date_str = date_range.split(" to ")
@@ -102,7 +160,18 @@ async def handle_custom_date_range(update: Update, context: ContextTypes.DEFAULT
         await update.message.reply_text("Invalid date range format. Please use YYYY-MM-DD to YYYY-MM-DD.")
     return ConversationHandler.END
 
+
 def get_date_range_from_period(period):
+    """
+    Converts a given period into a start and end date range.
+    
+    Args:
+        period (str): The period string (e.g., '1D', '1W', '1M', etc.).
+    
+    Returns:
+        tuple: A tuple containing the start and end dates as strings.
+    """
+
     end_date = datetime.now()
     if period == '1D':
         start_date = end_date - timedelta(days=1)
@@ -127,11 +196,24 @@ def get_date_range_from_period(period):
 
     return start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')
 
+
 async def export_to_csv(update: Update, context: ContextTypes.DEFAULT_TYPE, trades, filename_prefix, period):
+    """
+    Exports the trades to a CSV file and sends it to the user.
+    
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+        trades (list): The list of trades to be exported.
+        filename_prefix (str): The prefix for the filename.
+        period (str): The period for the export.
+    """
     if not trades:
+        # Inform the user if no trades are found
         await update.message.reply_text("No trades found for the selected criteria.")
         return
 
+    # Convert trades to a DataFrame and then to CSV
     df = pd.DataFrame(trades)
     if df.empty:
         await update.message.reply_text("No trades found for the selected criteria.")
@@ -141,6 +223,7 @@ async def export_to_csv(update: Update, context: ContextTypes.DEFAULT_TYPE, trad
     df.to_csv(csv_buffer, index=False)
     csv_buffer.seek(0)
 
+    # Send the CSV file to the user
     await context.bot.send_document(
         chat_id=update.effective_chat.id,
         document=csv_buffer,

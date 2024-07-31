@@ -4,6 +4,8 @@ from telegram.ext import ConversationHandler, ContextTypes
 from configs.bot_management import *
 import database.database_management as database_management
 
+
+
 async def check_previous_trades_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Provides options to check previous trades
@@ -13,10 +15,18 @@ async def check_previous_trades_handler(update: Update, context: ContextTypes.DE
     - By Ticker Name
     - By Trade's Side
     - by Trade's Status
+
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (CHECK_TRADES).
     """
     query = update.callback_query
     await query.answer()
 
+     # Create a keyboard with options for checking trades by different criteria
     keyboard = [
         [InlineKeyboardButton("By Date Range", callback_data='by_date_range')],
         [InlineKeyboardButton("By Trade ID", callback_data='by_trade_id')],
@@ -26,74 +36,149 @@ async def check_previous_trades_handler(update: Update, context: ContextTypes.DE
 
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
+
+     # Ask the user how they would like to check the trades
     await query.edit_message_text(
         text="How Would You Like To Check The Trades?",
         reply_markup=reply_markup
     )
     return CHECK_TRADES
 
+
 async def check_by_date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Prompts the user to enter the date range for checking trades.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (CHECK_DATE_RANGE).
+    """
     query = update.callback_query
     await query.answer()
 
+    # Ask the user to enter the date range
     await query.edit_message_text(
         text="Please enter the date range (YYYY-MM-DD to YYYY-MM-DD):"
     )
     return CHECK_DATE_RANGE
 
+
 async def check_by_trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Prompts the user to enter the trade ID for checking trades.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (CHECK_ID).
+    """
     query = update.callback_query
     await query.answer()
+
+    # Ask the user to enter the trade ID
     await query.edit_message_text(
         text="Please enter the trade ID:")
     return CHECK_ID
 
+
 async def check_by_ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Prompts the user to enter the ticker name for checking trades.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (CHECK_TICKER).
+    """
     query = update.callback_query
     await query.answer()
+
+    # Ask user to enter the ticker name
     await query.edit_message_text(
         text="Please enter the ticker name (e.g., XAUUSD):")
     return CHECK_TICKER
 
+
 async def check_by_side_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Prompts the user to select the side (Long/Short) for checking trades.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (CHECK_SIDE).
+    """
     query = update.callback_query
     await query.answer()
     
+    # Create a keyboard with options for selecting the trade side
     keyboard = [
         [InlineKeyboardButton("Long", callback_data='Long')],
         [InlineKeyboardButton("Short", callback_data='Short')],
     ]
+
     reply_markup = InlineKeyboardMarkup(keyboard)
+    # Ask the user to select the side
     await query.edit_message_text(
         text="Select the side (Long/Short):",
         reply_markup=reply_markup)
     return CHECK_SIDE
 
+
 async def check_by_status_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Prompts the user to select the status (Win/Loss) for checking trades.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (CHECK_STATUS).
+    """
     query = update.callback_query
     await query.answer()
     
+    # Create a keyboard with options for selecting the trade status
     keyboard = [
         [InlineKeyboardButton("Win", callback_data='Win')],
         [InlineKeyboardButton("Loss", callback_data='Loss')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
+
+     # Ask the user to select the status
     await query.edit_message_text(
         text="Select the status (Win/Loss):", 
         reply_markup=reply_markup)
     return CHECK_STATUS
 
-# Collecting user inputs and displaying results
+
 async def display_trades(update: Update, context: ContextTypes.DEFAULT_TYPE, trades):
     """
     Displays the list of trades to the user.
+    
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+        trades (list): The list of trades to display.
     """
     if not trades:
+         # Inform the user if no trades are found
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             text="No trades found for the given criteria."
         )
     else:
+        # Display each trade's details
         for trade in trades:
             trade_details = (
                 f"Trade ID: {trade['id']}\n"
@@ -111,36 +196,68 @@ async def display_trades(update: Update, context: ContextTypes.DEFAULT_TYPE, tra
                 text=trade_details
             )
 
+
 async def date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Handles date range input.
+    Handles the user's input for date range and retrieves the trades from the database.
+    
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: Ends the conversation.
     """
     date_range = update.message.text.split(' to ')
     trades = database_management.get_trades_by_date_range(date_range[0], date_range[1])
     await display_trades(update, context, trades)
     return ConversationHandler.END
 
+
 async def trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Handles trade ID input.
+    Handles the user's input for trade ID and retrieves the trade from the database.
+    
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: Ends the conversation.
     """
     trade_id = update.message.text
     trade = database_management.get_trades_by_id(trade_id)
     await display_trades(update, context, [trade] if trade else [])
     return ConversationHandler.END
 
+
 async def ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Handles ticker name input.
+    Handles the user's input for ticker name and retrieves the trades from the database.
+    
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: Ends the conversation.
     """
     ticker_name = update.message.text
     trades = database_management.get_trades_by_ticker(ticker_name)
     await display_trades(update, context, trades)
     return ConversationHandler.END
 
+
 async def side_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Handles side (Long/Short) selection.
+    Handles the user's selection of trade side (Long/Short) and retrieves the trades from the database.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: Ends the conversation.
     """
     query = update.callback_query
     await query.answer()
@@ -149,9 +266,17 @@ async def side_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
     await display_trades(update, context, trades)
     return ConversationHandler.END
 
+
 async def status_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Handles status (Win/Loss) selection.
+    Handles the user's selection of trade status (Win/Loss) and retrieves the trades from the database.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: Ends the conversation.
     """
     query = update.callback_query
     await query.answer()
@@ -160,9 +285,17 @@ async def status_selection_handler(update: Update, context: ContextTypes.DEFAULT
     await display_trades(update, context, trades)
     return ConversationHandler.END
 
+
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
-    Cancels the current trade recording process.
+    Cancels the current trade checking process.
+    
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: Ends the conversation.
     """
     await update.message.reply_text('Trade recording cancelled.')
     return ConversationHandler.END
