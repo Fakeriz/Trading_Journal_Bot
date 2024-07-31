@@ -25,6 +25,7 @@ def init_db():
     except Exception as e:
         print(e)
 
+
 def save_trade(date, ticker, time, win_loss, side, rr, pnl, strategy, picture):
     """
     Save a trade record to the database.
@@ -64,6 +65,7 @@ def save_trade(date, ticker, time, win_loss, side, rr, pnl, strategy, picture):
         # Print the exception message if an error occurs
         print(e)
 
+
 def get_trades_by_date_range(start_date: str, end_date:str):
     """
     Fetch trades from the database within the specified date range.
@@ -97,6 +99,7 @@ def get_trades_by_date_range(start_date: str, end_date:str):
         trade_list.append(trade_dict)
     
     return trade_list
+
 
 def get_trades_by_id(id: int):
     """Retrieve and search records by trade's ID.

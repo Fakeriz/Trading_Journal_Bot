@@ -21,23 +21,43 @@ from bot_handlers.export_data import *
 
 @restricted
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Send message on `/start`."""
-    # Get user that sent /start and log his name
+    """
+    Handles the /start command. Sends a welcome message and provides options for the user to choose from.
+
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (INIT).
+    """
+
+    # Get the user that sent the /start command and log their name
     user = update.message.from_user
     logger.info("User %s started the conversation.", user.first_name)
     
+    # Define the keyboard options for the user to choose from
     keyboard = [
             [InlineKeyboardButton("Add New Trade", callback_data='add_new_trade')],
             [InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades')],
             [InlineKeyboardButton("Export Data (CSV)", callback_data='export_csv')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Send the welcome message with the keyboard options
     await update.message.reply_text("Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
     return INIT
 
 
 def main():
+    """
+    Main function to run the Telegram bot. Sets up the conversation handler with different states and handlers.
+    """
+
+    # Create the application with the bot token
     application = Application.builder().token(BOT_TOKEN).build()
+
+    # Define the conversation handler with different states and their respective handlers
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
@@ -111,8 +131,13 @@ def main():
         },
         fallbacks=[CommandHandler('cancel', cancel)]
     )
+    # Add the conversation handler to the application
     application.add_handler(conv_handler)
+    
+    # Log that the bot has started
     logger.info("Bot Started...")
+
+    # Start polling for updates
     application.run_polling()
 
 if __name__ == "__main__":
