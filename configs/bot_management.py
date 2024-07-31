@@ -7,14 +7,14 @@ from typing import Final
 from telegram import Update
 from telegram.ext import ContextTypes
 
-# Conversation states
+# Conversation states enumeration
 INIT, DATE, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO, SAVE, CHECK_TRADES, CHECK_DATE_RANGE, CHECK_ID, CHECK_TICKER, CHECK_SIDE, CHECK_STATUS = range(17)
 
-# Load LIST_OF_ADMINS
+# Load environment variables from a .env file
 LIST_OF_ADMINS = os.getenv('LIST_OF_ADMINS')
 LIST_OF_ADMINS = [int(admin_id) for admin_id in LIST_OF_ADMINS.split(',')]
 
-# Importing BOT_TOKEN
+# Load BOT_TOKEN environment variable
 load_dotenv()
 BOT_TOKEN : Final = os.environ["BOT_TOKEN"]
 
@@ -27,6 +27,16 @@ logger = logging.getLogger(__name__)
 def restricted(func):
     """
     Decorator to restrict access to certain functions to admin users only.
+    
+    This decorator checks if the user attempting to access the decorated function
+    is in the list of authorized admin users. If the user is not authorized, access
+    is denied and a warning message is logged.
+    
+    Parameters:
+    - func: The function to be decorated.
+    
+    Returns:
+    - The wrapped function with access control.
     """
     @wraps(func)
     async def wrapped(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
