@@ -1,7 +1,7 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, ContextTypes
 
-import database.database_management as database_management
+from database.database_management import TradeDatabase
 from configs.bot_management import *
 from datetime import datetime, timedelta
 import pandas as pd
@@ -11,7 +11,8 @@ from io import BytesIO
 # Define states
 EXPORT_TICKER, EXPORT_PERIOD, CUSTOM_DATE_RANGE, CUSTOM_TICKER = range(17, 21)
 
-
+# Creating TradeDatabase instance
+trades_db = TradeDatabase()
 
 async def export_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -107,7 +108,7 @@ async def export_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TY
         # Handle the 'all_trades' option
         period = context.user_data['period']
         start_date, end_date = get_date_range_from_period(period)
-        trades = database_management.get_trades_for_export(None, period, start_date=start_date, end_date=end_date)
+        trades = trades_db.get_trades_for_export(None, period, start_date=start_date, end_date=end_date)
         await export_to_csv(update, context, trades, 'all_trades', period)
         await query.message.reply_text("Data exported successfully.")
         return ConversationHandler.END
@@ -128,7 +129,7 @@ async def handle_custom_ticker(update: Update, context: ContextTypes.DEFAULT_TYP
     period = context.user_data['period']
     start_date, end_date = get_date_range_from_period(period)
     
-    trades = database_management.get_trades_for_export(ticker, period, start_date=start_date, end_date=end_date)
+    trades = trades_db.get_trades_for_export(ticker, period, start_date=start_date, end_date=end_date)
     await export_to_csv(update, context, trades, ticker, period)
     await update.message.reply_text("Data exported successfully.")
     return ConversationHandler.END
@@ -153,7 +154,7 @@ async def handle_custom_date_range(update: Update, context: ContextTypes.DEFAULT
         
         period = context.user_data['period']
         ticker = context.user_data.get('ticker', None)
-        trades = database_management.get_trades_for_export(ticker, period, start_date=start_date, end_date=end_date)
+        trades = trades_db.get_trades_for_export(ticker, period, start_date=start_date, end_date=end_date)
         await export_to_csv(update, context, trades, ticker if ticker else 'all_trades', period)
         await update.message.reply_text("Data exported successfully.")
     except ValueError:
@@ -215,9 +216,16 @@ async def export_to_csv(update: Update, context: ContextTypes.DEFAULT_TYPE, trad
 
     # Convert trades to a DataFrame and then to CSV
     df = pd.DataFrame(trades)
+
+    # If the dataframe is empy then inform the user.
     if df.empty:
         await update.message.reply_text("No trades found for the selected criteria.")
         return
+    
+    # Add columns header to dataframe
+    cols = ['ID', 'Date', 'Time', 'Ticker', 'Status', 'Side', 'R:R Ratio', 'PnL', 'Strategy', 'Photo']
+    if not all(col in df.columns for col in cols):
+        df.columns = cols
 
     csv_buffer = BytesIO()
     df.to_csv(csv_buffer, index=False)

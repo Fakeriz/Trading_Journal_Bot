@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 
 from configs.bot_management import *
-import database.database_management as database_management
+from database.database_management import TradeDatabase
 
 
 
@@ -238,8 +238,11 @@ async def save_trade_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
     """
     context.user_data['photo'] = update.message.photo[-1].file_id   # Store photo 
 
+    # Create a instance of TradeDatabase.
+    trades_db = TradeDatabase()
+    
     # Save the trade details to the database
-    database_management.save_trade(
+    trades_db.save_trade(
         date= context.user_data['date'], 
         time= context.user_data['time'], 
         ticker = context.user_data['ticker_name'],

@@ -2,9 +2,10 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, ContextTypes
 
 from configs.bot_management import *
-import database.database_management as database_management
+from database.database_management import TradeDatabase
 
-
+# Creating TradeDatabase instance
+trades_db = TradeDatabase()
 
 async def check_previous_trades_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -209,7 +210,7 @@ async def date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         int: Ends the conversation.
     """
     date_range = update.message.text.split(' to ')
-    trades = database_management.get_trades_by_date_range(date_range[0], date_range[1])
+    trades = trades_db.get_trades_by_date_range(date_range[0], date_range[1])
     await display_trades(update, context, trades)
     return ConversationHandler.END
 
@@ -223,10 +224,10 @@ async def trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
     
     Returns:
-        int: Ends the conversation.
+        int: Ends the conversation.S
     """
     trade_id = update.message.text
-    trade = database_management.get_trades_by_id(trade_id)
+    trade = trades_db.get_trade_by_id(trade_id)
     await display_trades(update, context, [trade] if trade else [])
     return ConversationHandler.END
 
@@ -243,7 +244,7 @@ async def ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         int: Ends the conversation.
     """
     ticker_name = update.message.text
-    trades = database_management.get_trades_by_ticker(ticker_name)
+    trades = trades_db.get_trades_by_ticker(ticker_name)
     await display_trades(update, context, trades)
     return ConversationHandler.END
 
@@ -262,7 +263,7 @@ async def side_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
     query = update.callback_query
     await query.answer()
     side = query.data
-    trades = database_management.get_trades_by_side(side)
+    trades = trades_db.get_trades_by_side(side)
     await display_trades(update, context, trades)
     return ConversationHandler.END
 
@@ -281,7 +282,7 @@ async def status_selection_handler(update: Update, context: ContextTypes.DEFAULT
     query = update.callback_query
     await query.answer()
     status = query.data
-    trades = database_management.get_trades_by_status(status)
+    trades = trades_db.get_trades_by_status(status)
     await display_trades(update, context, trades)
     return ConversationHandler.END
 
