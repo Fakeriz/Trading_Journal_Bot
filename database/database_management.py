@@ -5,7 +5,7 @@ import datetime
 # Initialize the database
 def init_db():
     try:
-        conn = sqlite3.connect('trades.db')
+        conn = sqlite3.connect(r'database\trades.db')
         c = conn.cursor()
         c.execute('''
             CREATE TABLE IF NOT EXISTS trades (
@@ -47,7 +47,7 @@ def save_trade(date, ticker, time, win_loss, side, rr, pnl, strategy, picture):
 
     try:
         # Connect to the database
-        conn = sqlite3.connect('trades.db')
+        conn = sqlite3.connect(r'database\trades.db')
         c = conn.cursor()
         
         # Insert the trade record into the trades table
@@ -70,7 +70,7 @@ def get_trades_by_date_range(start_date: str, end_date:str):
     """
     Fetch trades from the database within the specified date range.
     """
-    conn = sqlite3.connect('trades.db')
+    conn = sqlite3.connect(r'database\trades.db')
     c = conn.cursor()
     query = """
         SELECT id, date, time, ticker, side, win_loss, pnl, rr, strategy, picture
@@ -109,7 +109,7 @@ def get_trades_by_id(id: int):
         dict: A dictionary containing the trade details if found, otherwise None.
     """
 
-    conn = sqlite3.connect('trades.db')
+    conn = sqlite3.connect(r'database\trades.db')
     c = conn.cursor()
     query = """
         SELECT *
@@ -144,7 +144,7 @@ def get_trades_by_ticker(ticker_name: str):
     Returns:
         dict: A dictionary containing all the trades found by ticker name.
     """
-    conn = sqlite3.connect('trades.db')
+    conn = sqlite3.connect(r'database\trades.db')
     c = conn.cursor()
     query = """ 
         SELECT * 
@@ -181,7 +181,7 @@ def get_trades_by_side(side: str):
         dict: A dictionary containing all the trades found by ticker name.
     """
 
-    conn = sqlite3.connect('trades.db')
+    conn = sqlite3.connect(r'database\trades.db')
     c = conn.cursor()
     query = """
         SELECT * 
@@ -218,7 +218,7 @@ def get_trades_by_status(status: str):
         dict: A dictionary containing all the trades found by ticker name.
     """
     
-    conn = sqlite3.connect('trades.db')
+    conn = sqlite3.connect(r'database\trades.db')
     c = conn.cursor()
     query = """
         SELECT * 
@@ -256,7 +256,7 @@ def get_all_tickers():
         list: A list of unique tickers.
     """
     try:
-        conn = sqlite3.connect('trades.db')
+        conn = sqlite3.connect(r'database\trades.db')
         cursor = conn.cursor()
         cursor.execute("SELECT DISTINCT ticker FROM trades")
         tickers = [row[0] for row in cursor.fetchall()]
@@ -280,7 +280,7 @@ def get_trades_for_export(ticker=None, period=None, start_date=None, end_date=No
     Returns:
         list: A list of trades.
     """
-    conn = sqlite3.connect('trades.db')
+    conn = sqlite3.connect(r'database\trades.db')
     c = conn.cursor()
     
     # Calculate date range using timedelta
