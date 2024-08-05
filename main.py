@@ -1,8 +1,4 @@
-from telegram import (
-    Update, 
-    InlineKeyboardButton, 
-    InlineKeyboardMarkup
-    )
+
 from telegram.ext import (
     Application, 
     CommandHandler, 
@@ -10,43 +6,12 @@ from telegram.ext import (
     CallbackQueryHandler, 
     MessageHandler, 
     filters, 
-    ContextTypes
     )
-from configs.bot_management import logger, restricted, BOT_TOKEN
+from configs.bot_management import logger, BOT_TOKEN
 from bot_handlers.add_trade import *
 from bot_handlers.check_trades import *
 from database.database_management import *
 from bot_handlers.export_data import *
-
-
-@restricted
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Handles the /start command. Sends a welcome message and provides options for the user to choose from.
-
-    Args:
-        update (Update): The update object that contains the user's message.
-        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
-    
-    Returns:
-        int: The next state in the conversation (INIT).
-    """
-
-    # Get the user that sent the /start command and log their name
-    user = update.message.from_user
-    logger.info("User %s started the conversation.", user.first_name)
-    
-    # Define the keyboard options for the user to choose from
-    keyboard = [
-            [InlineKeyboardButton("Add New Trade", callback_data='add_new_trade')],
-            [InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades')],
-            [InlineKeyboardButton("Export Data (CSV)", callback_data='export_csv')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    # Send the welcome message with the keyboard options
-    await update.message.reply_text("Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
-    return INIT
 
 
 def main():

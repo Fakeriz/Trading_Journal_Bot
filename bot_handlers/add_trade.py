@@ -2,10 +2,8 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, ContextTypes
 from datetime import datetime, timedelta
 
-
 from configs.bot_management import *
 from database.database_management import TradeDatabase
-
 
 
 
@@ -178,7 +176,7 @@ async def rr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         reply_to_message_id=update.effective_message.id,
-        text="What is Risk:Reward Ration?"
+        text="What is Risk:Reward Ratio?"
     )
     return PNL
 
@@ -253,9 +251,11 @@ async def save_trade_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
         strategy= context.user_data['strategy'], 
         picture= context.user_data['photo'])
 
+    # Notify user that trade recorded successfully.
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         reply_to_message_id=update.effective_message.id,
         text="Recorded Succesfully."
     )
-    return ConversationHandler.END
+    # return ConversationHandler.END
+    return await  return_to_main_menu(update, context)
