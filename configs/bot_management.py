@@ -6,9 +6,16 @@ from typing import Final
 
 from telegram import Update
 from telegram.ext import ContextTypes
+from telegram import (
+    Update, 
+    InlineKeyboardButton, 
+    InlineKeyboardMarkup
+    )
+
 
 # Conversation states enumeration
 INIT, DATE, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO, SAVE, CHECK_TRADES, CHECK_DATE_RANGE, CHECK_ID, CHECK_TICKER, CHECK_SIDE, CHECK_STATUS = range(17)
+
 
 # Load environment variables from a .env file
 LIST_OF_ADMINS = os.getenv('LIST_OF_ADMINS')
@@ -47,3 +54,54 @@ def restricted(func):
             return
         return await func(update, context, *args, **kwargs)
     return wrapped
+
+
+
+@restricted
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles the /start command. Sends a welcome message and provides options for the user to choose from.
+
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (INIT).
+    """
+
+    # Get the user that sent the /start command and log their name
+    user = update.message.from_user
+    logger.info("User %s started the conversation.", user.first_name)
+    
+    # Define the keyboard options for the user to choose from
+    keyboard = [
+            [InlineKeyboardButton("Add New Trade", callback_data='add_new_trade')],
+            [InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades')],
+            [InlineKeyboardButton("Export Data (CSV)", callback_data='export_csv')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Send the welcome message with the keyboard options
+    await update.message.reply_text("Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
+    return INIT
+
+
+
+async def return_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Informs the user that they are returning to the main menu and then displays the main menu options.
+    
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (INIT).
+    """
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="We returned back to the main menu. What would you like to do next?"
+    )
+    await start(update, context)
+    return INIT
