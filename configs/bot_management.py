@@ -71,7 +71,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
 
     # Get the user that sent the /start command and log their name
-    user = update.message.from_user
+    if update.message:
+        user = update.message.from_user
+        chat_id = update.message.chat.id
+    elif update.callback_query:
+        user = update.callback_query.from_user
+        chat_id = update.callback_query.message.chat.id
+        await update.callback_query.answer()
+
     logger.info("User %s started the conversation.", user.first_name)
     
     # Define the keyboard options for the user to choose from
@@ -83,9 +90,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Send the welcome message with the keyboard options
-    await update.message.reply_text("Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
+    await context.bot.send_message(chat_id=chat_id, text="Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
     return INIT
-
 
 
 async def return_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -99,9 +105,11 @@ async def return_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE
     Returns:
         int: The next state in the conversation (INIT).
     """
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text="We returned back to the main menu. What would you like to do next?"
-    )
+
+    chat_id = update.effective_chat.id if update.effective_chat else update.callback_query.message.chat.id
+
+    if update.callback_query:
+        await update.callback_query.answer()
+
     await start(update, context)
     return INIT
