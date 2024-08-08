@@ -1,6 +1,7 @@
-from functools import wraps
 import os
 import logging
+import datetime
+from functools import wraps
 from dotenv import load_dotenv
 from typing import Final
 
@@ -113,3 +114,40 @@ async def return_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     await start(update, context)
     return INIT
+
+
+
+# >> Below methods are used within add_trade.py module, to
+# >> validate date & time format provided by user.
+def is_valid_date(date_str: str):
+    """
+    Checks if the provided date string is in the correct format (YYYY-MM-DD) and represents a valid date.
+    
+    Args:
+        date_str (str): The date string to be validated.
+    
+    Returns:
+        bool: True if the date is valid, False otherwise.
+    """
+    try:
+        datetime.strptime(date_str, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+
+def is_valid_time(time_str: str):
+    """
+    Checks if the provided time string is in the correct format (HH:MM) and represents a valid time.
+    
+    Args:
+        time_str (str): The time string to be validated.
+    
+    Returns:
+        bool: True if the time is valid, False otherwise.
+    """
+    try:
+        datetime.strptime(time_str, "%H:%M")
+        return True
+    except ValueError:
+        return False
