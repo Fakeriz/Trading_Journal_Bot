@@ -212,7 +212,7 @@ async def date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     date_range = update.message.text.split(' to ')
     trades = trades_db.get_trades_by_date_range(date_range[0], date_range[1])
     await display_trades(update, context, trades)
-    return ConversationHandler.END
+    return await  return_to_main_menu(update, context)
 
 
 async def trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -229,7 +229,7 @@ async def trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     trade_id = update.message.text
     trade = trades_db.get_trade_by_id(trade_id)
     await display_trades(update, context, [trade] if trade else [])
-    return ConversationHandler.END
+    return await  return_to_main_menu(update, context)
 
 
 async def ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -246,7 +246,7 @@ async def ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     ticker_name = update.message.text
     trades = trades_db.get_trades_by_ticker(ticker_name)
     await display_trades(update, context, trades)
-    return ConversationHandler.END
+    return await  return_to_main_menu(update, context)
 
 
 async def side_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -265,7 +265,7 @@ async def side_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
     side = query.data
     trades = trades_db.get_trades_by_side(side)
     await display_trades(update, context, trades)
-    return ConversationHandler.END
+    return await return_to_main_menu(update, context)
 
 
 async def status_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -284,7 +284,7 @@ async def status_selection_handler(update: Update, context: ContextTypes.DEFAULT
     status = query.data
     trades = trades_db.get_trades_by_status(status)
     await display_trades(update, context, trades)
-    return ConversationHandler.END
+    return await  return_to_main_menu(update, context)
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -299,4 +299,4 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         int: Ends the conversation.
     """
     await update.message.reply_text('Trade recording cancelled.')
-    return ConversationHandler.END
+    return await  return_to_main_menu(update, context)
