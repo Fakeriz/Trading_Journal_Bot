@@ -111,7 +111,7 @@ async def export_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TY
         trades = trades_db.get_trades_for_export(None, period, start_date=start_date, end_date=end_date)
         await export_to_csv(update, context, trades, 'all_trades', period)
         await query.message.reply_text("Data exported successfully.")
-        return ConversationHandler.END
+        return await return_to_main_menu(update, context)
 
 
 async def handle_custom_ticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -132,7 +132,7 @@ async def handle_custom_ticker(update: Update, context: ContextTypes.DEFAULT_TYP
     trades = trades_db.get_trades_for_export(ticker, period, start_date=start_date, end_date=end_date)
     await export_to_csv(update, context, trades, ticker, period)
     await update.message.reply_text("Data exported successfully.")
-    return ConversationHandler.END
+    return await  return_to_main_menu(update, context)
 
 
 async def handle_custom_date_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -159,7 +159,7 @@ async def handle_custom_date_range(update: Update, context: ContextTypes.DEFAULT
         await update.message.reply_text("Data exported successfully.")
     except ValueError:
         await update.message.reply_text("Invalid date range format. Please use YYYY-MM-DD to YYYY-MM-DD.")
-    return ConversationHandler.END
+    return await  return_to_main_menu(update, context)
 
 
 def get_date_range_from_period(period):
