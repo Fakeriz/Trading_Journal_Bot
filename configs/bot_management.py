@@ -1,6 +1,6 @@
 import os
 import logging
-import datetime
+from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
 from typing import Final
