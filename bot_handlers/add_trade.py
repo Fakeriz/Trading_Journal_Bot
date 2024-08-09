@@ -1,7 +1,7 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from datetime import datetime
-from configs.bot_management import *
+from utils.bot_management import *
 from database.database_management import TradeDatabase
 
 

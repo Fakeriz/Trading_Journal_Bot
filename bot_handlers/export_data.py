@@ -2,7 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, ContextTypes
 
 from database.database_management import TradeDatabase
-from configs.bot_management import *
+from utils.bot_management import *
 from datetime import datetime, timedelta
 import pandas as pd
 from io import BytesIO
