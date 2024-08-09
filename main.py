@@ -1,4 +1,3 @@
-
 from telegram.ext import (
     Application, 
     CommandHandler, 
@@ -44,6 +43,9 @@ def main():
                 CallbackQueryHandler(date_handler, pattern='^(DHL|Close_NYSE|MTR|FF)$'),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, date_handler)
             ],
+            DATE_VALIDATION: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, date_validation)
+                ],
             TIME: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, time_handler)
             ],
