@@ -1,7 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ConversationHandler, ContextTypes
-from datetime import datetime, timedelta
-
+from telegram.ext import ContextTypes
+from datetime import datetime
 from configs.bot_management import *
 from database.database_management import TradeDatabase
 
@@ -98,7 +97,6 @@ async def strategy_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     - Close NYSE
     - DHL (High/Low previous day) 
     """
-
     query = update.callback_query
     await query.answer()
     
@@ -126,7 +124,6 @@ async def date_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
     Returns:
         int: The next state in the conversation (TIME).
     """
-
     query = update.callback_query
     await query.answer()
 
@@ -136,7 +133,34 @@ async def date_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
         chat_id=update.effective_chat.id,
         text="Please enter the date of the trade (YYYY-MM-DD):"
     )
-    return TIME
+    
+    return DATE_VALIDATION
+
+
+async def date_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    date_str = update.message.text
+    try:
+        # Attempt to parse the date
+        date = datetime.strptime(date_str, "%Y-%m-%d")
+        
+        # Check if the date is not in the future
+        if date > datetime.now():
+            raise ValueError("Date cannot be in the future")
+        
+        # If valid, store the date and move to the next step
+        context.user_data['date'] = date_str
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Time of Trade? (HH:MM)"
+        )
+        return TIME
+    except ValueError as e:
+        # If invalid, ask the user to enter the date again
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"Invalid date format or {str(e)}. Please enter the date again (YYYY-MM-DD):"
+        )
+        return DATE_VALIDATION
 
 
 async def time_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
@@ -150,14 +174,25 @@ async def time_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
     Returns:
         int: The next state in the conversation (RR).
     """
-
-    context.user_data['date'] = update.message.text     # Store trade date
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        reply_to_message_id=update.effective_message.id,
-        text="Time Of Trade?(HH:MM)"
-    )
-    return RR
+    time_str = update.message.text
+    try:
+        # Attempt to parse the time
+        time = datetime.strptime(time_str, "%H:%M")
+        
+        # If valid, store the time and move to the next step
+        context.user_data['time'] = time_str
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="What is Risk:Reward Ratio?"
+        )
+        return RR
+    except ValueError:
+        # If invalid, ask the user to enter the time again
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Invalid time format. Please enter the time again (HH:MM):"
+        )
+        return TIME
 
 
 async def rr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -192,7 +227,6 @@ async def pnl_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
     Returns:
         int: The next state in the conversation (PHOTO).
     """
-
     context.user_data['rr'] = update.message.text       # Store Risk:Reward ratio
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -240,7 +274,7 @@ async def save_trade_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
     trades_db = TradeDatabase()
     
     # Save the trade details to the database
-    trades_db.save_trade(
+    trade_id = trades_db.save_trade(
         date= context.user_data['date'], 
         time= context.user_data['time'], 
         ticker = context.user_data['ticker_name'],
@@ -255,7 +289,7 @@ async def save_trade_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         reply_to_message_id=update.effective_message.id,
-        text="Recorded Succesfully."
+        text=f"Trade recorded successfully. The Trade ID is {trade_id}."
     )
     # return ConversationHandler.END
     return await return_to_main_menu(update, context)
