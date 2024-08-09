@@ -1,6 +1,5 @@
 import os
 import logging
-from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
 from typing import Final
@@ -15,7 +14,7 @@ from telegram import (
 
 
 # Conversation states enumeration
-INIT, DATE, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO, SAVE, CHECK_TRADES, CHECK_DATE_RANGE, CHECK_ID, CHECK_TICKER, CHECK_SIDE, CHECK_STATUS = range(17)
+INIT, DATE, DATE_VALIDATION, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO, SAVE, CHECK_TRADES, CHECK_DATE_RANGE, CHECK_ID, CHECK_TICKER, CHECK_SIDE, CHECK_STATUS = range(18)
 
 
 # Load environment variables from a .env file
@@ -31,7 +30,8 @@ logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
-# Decorator to restretic access to the bot to only admins.
+
+# Decorator to restrict access to the bot to only admins.
 def restricted(func):
     """
     Decorator to restrict access to certain functions to admin users only.
@@ -84,15 +84,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Define the keyboard options for the user to choose from
     keyboard = [
-            [InlineKeyboardButton("Add New Trade", callback_data='add_new_trade')],
-            [InlineKeyboardButton("Check Previous Trades", callback_data='check_previous_trades')],
-            [InlineKeyboardButton("Export Data (CSV)", callback_data='export_csv')]
+        [InlineKeyboardButton("➕ Add New Trade", callback_data='add_new_trade')],
+        [InlineKeyboardButton("📊 Check Previous Trades", callback_data='check_previous_trades')],
+        [InlineKeyboardButton("📁 Export Data (CSV)", callback_data='export_csv')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Send the welcome message with the keyboard options
-    await context.bot.send_message(chat_id=chat_id, text="Welcome to trading journal bot. Choose an option:", reply_markup=reply_markup)
+    await context.bot.send_message(chat_id=chat_id,
+                                   text="Please choose an option from the menu below:",
+                                   reply_markup=reply_markup)
     return INIT
+
 
 
 async def return_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -107,47 +110,10 @@ async def return_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE
         int: The next state in the conversation (INIT).
     """
 
-    chat_id = update.effective_chat.id if update.effective_chat else update.callback_query.message.chat.id
+    # chat_id = update.effective_chat.id if update.effective_chat else update.callback_query.message.chat.id
 
     if update.callback_query:
         await update.callback_query.answer()
 
     await start(update, context)
     return INIT
-
-
-
-# >> Below methods are used within add_trade.py module, to
-# >> validate date & time format provided by user.
-def is_valid_date(date_str: str):
-    """
-    Checks if the provided date string is in the correct format (YYYY-MM-DD) and represents a valid date.
-    
-    Args:
-        date_str (str): The date string to be validated.
-    
-    Returns:
-        bool: True if the date is valid, False otherwise.
-    """
-    try:
-        datetime.strptime(date_str, "%Y-%m-%d")
-        return True
-    except ValueError:
-        return False
-
-
-def is_valid_time(time_str: str):
-    """
-    Checks if the provided time string is in the correct format (HH:MM) and represents a valid time.
-    
-    Args:
-        time_str (str): The time string to be validated.
-    
-    Returns:
-        bool: True if the time is valid, False otherwise.
-    """
-    try:
-        datetime.strptime(time_str, "%H:%M")
-        return True
-    except ValueError:
-        return False
