@@ -1,6 +1,7 @@
 import sqlite3
 import datetime
 
+
 class TradeDatabase:
     def __init__(self, db_path=r'database/trades.db'):
         self.db_path = db_path

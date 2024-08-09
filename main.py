@@ -6,7 +6,7 @@ from telegram.ext import (
     MessageHandler, 
     filters, 
     )
-from configs.bot_management import logger, BOT_TOKEN
+from utils.bot_management import logger, BOT_TOKEN
 from bot_handlers.add_trade import *
 from bot_handlers.check_trades import *
 from database.database_management import *
