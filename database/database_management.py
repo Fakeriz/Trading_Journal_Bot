@@ -39,8 +39,14 @@ class TradeDatabase:
                 INSERT INTO trades (date, time, ticker, win_loss, side, rr, pnl, strategy, picture)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (date, time, ticker, win_loss, side, rr, pnl, strategy, picture))
+
+            # Get trade id
+            trade_id = c.lastrowid
+
             conn.commit()
             conn.close()
+            return trade_id
+
         except Exception as e:
             print(e)
 
