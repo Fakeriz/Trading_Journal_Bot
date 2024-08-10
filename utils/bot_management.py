@@ -16,7 +16,6 @@ from telegram import (
 # Conversation states enumeration
 INIT, DATE, DATE_VALIDATION, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO, SAVE, CHECK_TRADES, CHECK_DATE_RANGE, CHECK_ID, CHECK_TICKER, CHECK_SIDE, CHECK_STATUS = range(18)
 
-
 # Load environment variables from a .env file
 LIST_OF_ADMINS = os.getenv('LIST_OF_ADMINS')
 LIST_OF_ADMINS = [int(admin_id) for admin_id in LIST_OF_ADMINS.split(',')]
