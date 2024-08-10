@@ -39,18 +39,18 @@ def main():
             STRATEGY: [
                 CallbackQueryHandler(strategy_handler, pattern='^(Long|Short)$')
             ],
-            DATE: [
-                CallbackQueryHandler(date_handler, pattern='^(DHL|Close_NYSE|MTR|FF)$'),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, date_handler)
-            ],
-            TIME: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, time_handler)
-            ],
             RR: [
+                CallbackQueryHandler(rr_handler, pattern='^(DHL|Close_NYSE|MTR|FF)$'),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, rr_handler)
             ],
             PNL: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, pnl_handler)
+            ],
+            DATE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, date_handler)
+            ],
+            TIME: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, time_handler)
             ],
             PHOTO: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, photo_handler)
