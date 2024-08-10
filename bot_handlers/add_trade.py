@@ -5,7 +5,6 @@ from utils.bot_management import *
 from database.database_management import TradeDatabase
 
 
-
 async def new_trade_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Initiates the process of adding a new trade by asking the user to select a ticker.
@@ -110,52 +109,8 @@ async def strategy_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text= "Trading Setup?", reply_markup=reply_markup)
-    return DATE
-
-
-async def date_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
-    """
-    Asks the user to enter the date of the trade.
-    
-    Args:
-        update (Update): The update object that contains the callback query.
-        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
-    
-    Returns:
-        int: The next state in the conversation (TIME).
-    """
-
-    query = update.callback_query
-    await query.answer()
-
-    # Collect Date
-    context.user_data['strategy'] = query.data
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text="Please enter the date of the trade (YYYY-MM-DD):"
-    )
-    return TIME
-
-
-async def time_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
-    """
-    Asks the user to enter the time of the trade.
-    
-    Args:
-        update (Update): The update object that contains the user's message.
-        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
-    
-    Returns:
-        int: The next state in the conversation (RR).
-    """
-
-    context.user_data['date'] = update.message.text     # Store trade date
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        reply_to_message_id=update.effective_message.id,
-        text="Time Of Trade?(HH:MM)"
-    )
     return RR
+
 
 async def rr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -168,8 +123,12 @@ async def rr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Returns:
         int: The next state in the conversation (PNL).
     """
+    
+    query = update.callback_query
+    await query.answer()
 
-    context.user_data['time'] = update.message.text     # Store trade time
+    # Collect Date
+    context.user_data['strategy'] = query.data     # Store trade time
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         reply_to_message_id=update.effective_message.id,
@@ -195,8 +154,52 @@ async def pnl_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
         reply_to_message_id=update.effective_message.id,
         text="What was PnL?"
     )
-    return PHOTO
+    return DATE
 
+
+async def date_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
+    """
+    Asks the user to enter the date of the trade.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (TIME).
+    """
+    context.user_data['pnl'] = update.message.text
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Please enter the date of the trade (YYYY-MM-DD):"
+    )
+    return TIME
+
+
+async def time_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
+    """
+    Asks the user to enter the time of the trade.
+
+    Args:
+        update (Update): The update object that contains the user's message.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+
+    Returns:
+        int: The next state in the conversation (RR).
+    """
+    date_str = update.message.text
+
+    if is_valid_date(date_str):
+        context.user_data['date'] = update.message.text  # Store the trade date
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="What time was the trade? (HH:MM)"
+            )
+        return PHOTO
+    else:
+        await context.bot.send_message("Invalid date format. Please enter the date in YYYY-MM-DD format.")
+        return DATE  # Re-ask for the date if it's incorrect
+# update.message.reply_text
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -209,14 +212,19 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Returns:
         int: The next state in the conversation (SAVE).
     """
+    time_str = update.message.text    # Store PnL
 
-    context.user_data['pnl'] = update.message.text      # Store PnL
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        reply_to_message_id=update.effective_message.id,
-        text="Please Send a Picture of Your Trade."
-    )
-    return SAVE
+    if is_valid_time(time_str):
+        context.user_data['time'] = update.message.text
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            reply_to_message_id=update.effective_message.id,
+            text="Please Send a Picture of Your Trade."
+        )
+        return SAVE
+    else:
+        await context.bot.send_message("Invalid Time format. Please enter the date in HH:MM format.")
+        return TIME
 
 
 async def save_trade_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
