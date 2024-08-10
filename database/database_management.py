@@ -31,6 +31,7 @@ class TradeDatabase:
         except Exception as e:
             print(e)
 
+
     def save_trade(self, date, ticker, time, win_loss, side, rr, pnl, strategy, picture):
         """Save a trade record to the database."""
         try:
@@ -45,11 +46,15 @@ class TradeDatabase:
             trade_id = c.lastrowid
 
             conn.commit()
-            conn.close()
             return trade_id
 
-        except Exception as e:
-            print(e)
+        except sqlite3.Error as e:
+            print(f"An error occurred: {e}")
+            return None
+
+        finally:
+            if conn:
+                conn.close()
 
     def get_trades_by_date_range(self, start_date, end_date):
         """Fetch trades from the database within the specified date range."""
@@ -169,7 +174,7 @@ class TradeDatabase:
             'time': trade[2],
             'ticker': trade[3],
             'side': trade[4],
-            'status': trade[5],
+            'win_loss': trade[5],
             'pnl': trade[6],
             'rr': trade[7],
             'strategy': trade[8],
