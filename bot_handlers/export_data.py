@@ -3,16 +3,19 @@ from telegram.ext import ConversationHandler, ContextTypes
 
 from database.database_management import TradeDatabase
 from utils.bot_management import *
+from utils.states_manager import *
 from datetime import datetime, timedelta
 import pandas as pd
 from io import BytesIO
 
 
+
 # Define states
-EXPORT_TICKER, EXPORT_PERIOD, CUSTOM_DATE_RANGE, CUSTOM_TICKER = range(17, 21)
+# EXPORT_TICKER, EXPORT_PERIOD, CUSTOM_DATE_RANGE, CUSTOM_TICKER = range(17, 21)
 
 # Creating TradeDatabase instance
 trades_db = TradeDatabase()
+
 
 async def export_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -49,7 +52,7 @@ async def export_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         text="Please choose the date period for export:",
         reply_markup=reply_markup
     )
-    return EXPORT_PERIOD
+    return ExportStates.EXPORT_PERIOD
 
 
 async def export_data_period_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -72,7 +75,7 @@ async def export_data_period_handler(update: Update, context: ContextTypes.DEFAU
     if period == 'custom':
         # Ask the user to enter a custom date range
         await query.message.reply_text("Please enter the custom date range (YYYY-MM-DD to YYYY-MM-DD):")
-        return CUSTOM_DATE_RANGE
+        return ExportStates.CUSTOM_DATE_RANGE
 
     # Ask for ticker or choose to export all trades
     keyboard = [
@@ -81,7 +84,7 @@ async def export_data_period_handler(update: Update, context: ContextTypes.DEFAU
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text("Do you want to export trades for a specific ticker or all trades?", reply_markup=reply_markup)
-    return EXPORT_TICKER
+    return ExportStates.EXPORT_TICKER
 
 
 async def export_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -103,7 +106,7 @@ async def export_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TY
     if ticker == 'choose_ticker':
         # Ask the user to enter the ticker name
         await query.message.reply_text("Please enter the ticker name (e.g., XAUUSD):")
-        return CUSTOM_TICKER
+        return ExportStates.CUSTOM_TICKER
     else:
         # Handle the 'all_trades' option
         period = context.user_data['period']

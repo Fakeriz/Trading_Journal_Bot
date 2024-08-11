@@ -2,6 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from datetime import datetime
 from utils.bot_management import *
+from utils.states_manager import *
 from database.database_management import TradeDatabase
 
 
@@ -25,7 +26,7 @@ async def new_trade_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text="Please Choose Ticker's Name.", reply_markup=reply_markup)
-    return WIN_LOSS
+    return TradeStates.WIN_LOSS
 
 
 async def win_loss_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -51,7 +52,7 @@ async def win_loss_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text="Trade Status? (WIN/LOSS).", reply_markup=reply_markup)
-    return SIDE
+    return TradeStates.SIDE
 
 
 async def side_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -76,7 +77,7 @@ async def side_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text= "Position Side? (Buy/Sell)", reply_markup=reply_markup)
-    return STRATEGY
+    return TradeStates.STRATEGY
 
 
 async def strategy_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -109,7 +110,7 @@ async def strategy_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text= "Trading Setup?", reply_markup=reply_markup)
-    return RR
+    return TradeStates.RR
 
 
 async def rr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -134,7 +135,7 @@ async def rr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_to_message_id=update.effective_message.id,
         text="What is Risk:Reward Ratio?"
     )
-    return PNL
+    return TradeStates.PNL
 
 
 async def pnl_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
@@ -154,7 +155,7 @@ async def pnl_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
         reply_to_message_id=update.effective_message.id,
         text="What was PnL?"
     )
-    return DATE
+    return TradeStates.DATE
 
 
 async def date_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
@@ -173,7 +174,7 @@ async def date_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
         chat_id=update.effective_chat.id,
         text="Please enter the date of the trade (YYYY-MM-DD):"
     )
-    return TIME
+    return TradeStates.TIME
 
 
 async def time_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
@@ -195,10 +196,10 @@ async def time_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
             chat_id=update.effective_chat.id,
             text="What time was the trade? (HH:MM)"
             )
-        return PHOTO
+        return TradeStates.PHOTO
     else:
         await context.bot.send_message("Invalid date format. Please enter the date in YYYY-MM-DD format.")
-        return DATE  # Re-ask for the date if it's incorrect
+        return TradeStates.DATE  # Re-ask for the date if it's incorrect
 # update.message.reply_text
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -221,10 +222,10 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_to_message_id=update.effective_message.id,
             text="Please Send a Picture of Your Trade."
         )
-        return SAVE
+        return TradeStates.SAVE
     else:
         await context.bot.send_message("Invalid Time format. Please enter the date in HH:MM format.")
-        return TIME
+        return TradeStates.TIME
 
 
 async def save_trade_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):

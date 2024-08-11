@@ -2,6 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, ContextTypes
 
 from utils.bot_management import *
+from utils.states_manager import * 
 from database.database_management import TradeDatabase
 
 # Creating TradeDatabase instance
@@ -43,7 +44,8 @@ async def check_previous_trades_handler(update: Update, context: ContextTypes.DE
         text="How Would You Like To Check The Trades?",
         reply_markup=reply_markup
     )
-    return CHECK_TRADES
+    return CheckTradesStates.CHECK_TRADES
+
 
 
 async def check_by_date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -64,7 +66,8 @@ async def check_by_date_range_handler(update: Update, context: ContextTypes.DEFA
     await query.edit_message_text(
         text="Please enter the date range (YYYY-MM-DD to YYYY-MM-DD):"
     )
-    return CHECK_DATE_RANGE
+    return CheckTradesStates.CHECK_DATE_RANGE
+
 
 
 async def check_by_trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -84,7 +87,8 @@ async def check_by_trade_id_handler(update: Update, context: ContextTypes.DEFAUL
     # Ask the user to enter the trade ID
     await query.edit_message_text(
         text="Please enter the trade ID:")
-    return CHECK_ID
+    return CheckTradesStates.CHECK_ID
+
 
 
 async def check_by_ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -104,7 +108,8 @@ async def check_by_ticker_name_handler(update: Update, context: ContextTypes.DEF
     # Ask user to enter the ticker name
     await query.edit_message_text(
         text="Please enter the ticker name (e.g., XAUUSD):")
-    return CHECK_TICKER
+    return CheckTradesStates.CHECK_TICKER
+
 
 
 async def check_by_side_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -132,7 +137,8 @@ async def check_by_side_handler(update: Update, context: ContextTypes.DEFAULT_TY
     await query.edit_message_text(
         text="Select the side (Long/Short):",
         reply_markup=reply_markup)
-    return CHECK_SIDE
+    return CheckTradesStates.CHECK_SIDE
+
 
 
 async def check_by_status_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -159,8 +165,11 @@ async def check_by_status_handler(update: Update, context: ContextTypes.DEFAULT_
      # Ask the user to select the status
     await query.edit_message_text(
         text="Select the status (Win/Loss):", 
-        reply_markup=reply_markup)
-    return CHECK_STATUS
+        reply_markup=reply_markup
+        )
+    
+    return CheckTradesStates.CHECK_STATUS
+
 
 
 async def display_trades(update: Update, context: ContextTypes.DEFAULT_TYPE, trades):
@@ -197,6 +206,18 @@ async def display_trades(update: Update, context: ContextTypes.DEFAULT_TYPE, tra
                 text=trade_details
             )
 
+# async def display_trades(update, context, trades):
+#     for trade in trades:
+#         trade_text = (
+#             f"Trade ID: {trade.get('id', 'N/A')}\n"
+#             f"Ticker: {trade.get('ticker', 'N/A')}\n"
+#             f"Date: {trade.get('date', 'N/A')}\n"
+#             f"Side: {trade.get('side', 'N/A')}\n"
+#             f"PnL: {trade.get('pnl', 'N/A')}\n"
+#             f"Status: {trade.get('status', 'Unknown')}\n"
+#         )
+#         await update.message.reply_text(trade_text)
+
 
 async def date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -213,6 +234,7 @@ async def date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     trades = trades_db.get_trades_by_date_range(date_range[0], date_range[1])
     await display_trades(update, context, trades)
     return await  return_to_main_menu(update, context)
+
 
 
 async def trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -232,6 +254,7 @@ async def trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return await  return_to_main_menu(update, context)
 
 
+
 async def ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Handles the user's input for ticker name and retrieves the trades from the database.
@@ -247,6 +270,7 @@ async def ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     trades = trades_db.get_trades_by_ticker(ticker_name)
     await display_trades(update, context, trades)
     return await  return_to_main_menu(update, context)
+
 
 
 async def side_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -268,6 +292,7 @@ async def side_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
     return await return_to_main_menu(update, context)
 
 
+
 async def status_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Handles the user's selection of trade status (Win/Loss) and retrieves the trades from the database.
@@ -284,7 +309,7 @@ async def status_selection_handler(update: Update, context: ContextTypes.DEFAULT
     status = query.data
     trades = trades_db.get_trades_by_status(status)
     await display_trades(update, context, trades)
-    return await  return_to_main_menu(update, context)
+    return await return_to_main_menu(update, context)
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
