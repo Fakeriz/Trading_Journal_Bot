@@ -6,12 +6,14 @@ from telegram.ext import (
     MessageHandler, 
     filters, 
     )
-from utils.bot_management import logger, BOT_TOKEN
+from utils.bot_management import logger, BOT_TOKEN, start
 from utils.states_manager import *
 from bot_handlers.add_trade import *
 from bot_handlers.check_trades import *
+from bot_handlers.update_trades_handler import *
 from database.database_management import *
 from bot_handlers.export_data import *
+from bot_handlers.update_trades_handler import *
 
 
 def main():
@@ -29,7 +31,8 @@ def main():
             TradeStates.INIT: [
                 CallbackQueryHandler(new_trade_handler, pattern='^add_new_trade$'),
                 CallbackQueryHandler(check_previous_trades_handler, pattern='^check_previous_trades$'),
-                CallbackQueryHandler(export_data_handler, pattern='^export_csv$')
+                CallbackQueryHandler(export_data_handler, pattern='^export_csv$'),
+                CallbackQueryHandler(start_update_trade, pattern='^update_trade$')
             ],
             TradeStates.WIN_LOSS: [
                 CallbackQueryHandler(win_loss_handler, pattern='^(XAUUSD|EURUSD)$')
@@ -92,6 +95,24 @@ def main():
             ],
             ExportStates.CUSTOM_TICKER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_custom_ticker)
+            ],
+            UpdateTradesState.TRADE_ID: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, trade_id_handler)
+            ],
+            UpdateTradesState.UPDATE_CHOICE: [
+                CallbackQueryHandler(update_trade_handler)
+            ],
+            UpdateTradesState.UPDATE_TICKER: [
+                CallbackQueryHandler(update_ticker_handler)
+            ],
+            UpdateTradesState.UPDATE_STATUS: [
+                CallbackQueryHandler(update_status_handler)
+            ],
+            UpdateTradesState.UPDATE_SIDE: [
+                CallbackQueryHandler(update_side_handler)
+            ],
+            UpdateTradesState.UPDATE_STRATEGY: [
+                CallbackQueryHandler(update_strategy_handler)
             ],
         },
         fallbacks=[CommandHandler('cancel', cancel)]

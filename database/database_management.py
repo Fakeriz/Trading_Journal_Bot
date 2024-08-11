@@ -166,6 +166,14 @@ class TradeDatabase:
             raise ValueError("Invalid period specified.")
         return end_date - datetime.timedelta(days=periods[period])
 
+    def update_trade(self, trade_id: int, updates: dict[str, str]):
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        for key, value in updates.items():
+            c.execute(f'UPDATE trades SET {key} = ? WHERE id = ?', (value, trade_id))
+        conn.commit()
+        conn.close()
+
     def _trade_to_dict(self, trade):
         """Convert trade tuple to dictionary."""
         return {
@@ -180,3 +188,4 @@ class TradeDatabase:
             'strategy': trade[8],
             'picture': trade[9]
         } if trade else None
+

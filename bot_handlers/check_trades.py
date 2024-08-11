@@ -1,8 +1,8 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, ContextTypes
 
-from utils.bot_management import *
-from utils.states_manager import * 
+from utils.bot_management import return_to_main_menu
+from utils.states_manager import CheckTradesStates
 from database.database_management import TradeDatabase
 
 # Creating TradeDatabase instance
@@ -206,17 +206,6 @@ async def display_trades(update: Update, context: ContextTypes.DEFAULT_TYPE, tra
                 text=trade_details
             )
 
-# async def display_trades(update, context, trades):
-#     for trade in trades:
-#         trade_text = (
-#             f"Trade ID: {trade.get('id', 'N/A')}\n"
-#             f"Ticker: {trade.get('ticker', 'N/A')}\n"
-#             f"Date: {trade.get('date', 'N/A')}\n"
-#             f"Side: {trade.get('side', 'N/A')}\n"
-#             f"PnL: {trade.get('pnl', 'N/A')}\n"
-#             f"Status: {trade.get('status', 'Unknown')}\n"
-#         )
-#         await update.message.reply_text(trade_text)
 
 
 async def date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):

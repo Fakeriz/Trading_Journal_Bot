@@ -85,8 +85,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("➕ Add New Trade", callback_data='add_new_trade')],
         [InlineKeyboardButton("📊 Check Previous Trades", callback_data='check_previous_trades')],
-        [InlineKeyboardButton("📁 Export Data (CSV)", callback_data='export_csv')]
+        [InlineKeyboardButton("📁 Export Data (CSV)", callback_data='export_csv')],
+        [InlineKeyboardButton("📁 Update a Trade", callback_data='update_trade')]
     ]
+
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Send the welcome message with the keyboard options

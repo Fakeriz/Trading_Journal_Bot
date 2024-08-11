@@ -36,3 +36,11 @@ class CheckTradesStates(Enum):
     CHECK_TICKER = auto()
     CHECK_SIDE = auto()
     CHECK_STATUS = auto()
+
+class UpdateTradesState(Enum):
+    TRADE_ID = auto()
+    UPDATE_CHOICE = auto()
+    UPDATE_TICKER = auto()
+    UPDATE_STATUS = auto()
+    UPDATE_SIDE = auto()
+    UPDATE_STRATEGY = auto()
