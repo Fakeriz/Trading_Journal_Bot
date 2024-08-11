@@ -56,6 +56,7 @@ class TradeDatabase:
             if conn:
                 conn.close()
 
+
     def get_trades_by_date_range(self, start_date, end_date):
         """Fetch trades from the database within the specified date range."""
         conn = sqlite3.connect(self.db_path)
@@ -82,6 +83,7 @@ class TradeDatabase:
         
         return self._trade_to_dict(trade) if trade else None
 
+
     def get_trades_by_ticker(self, ticker_name):
         """Retrieve and search records by trade's ticker."""
         conn = sqlite3.connect(self.db_path)
@@ -92,6 +94,7 @@ class TradeDatabase:
         conn.close()
         
         return [self._trade_to_dict(trade) for trade in trades]
+
 
     def get_trades_by_side(self, side):
         """Retrieve and search records by trade's side (Long/Short)."""
@@ -104,6 +107,7 @@ class TradeDatabase:
         
         return [self._trade_to_dict(trade) for trade in trades]
 
+
     def get_trades_by_status(self, status):
         """Retrieve and search records by trade's status (Win/Loss)."""
         conn = sqlite3.connect(self.db_path)
@@ -114,6 +118,7 @@ class TradeDatabase:
         conn.close()
         
         return [self._trade_to_dict(trade) for trade in trades]
+
 
     def get_all_tickers(self):
         """Fetch all unique tickers from the database."""
@@ -127,6 +132,7 @@ class TradeDatabase:
         except sqlite3.Error as e:
             print(f"An error occurred: {e}")
             return []
+
 
     def get_trades_for_export(self, ticker=None, period=None, start_date=None, end_date=None):
         """Fetch trades for a specified ticker and period, or custom date range."""
@@ -188,4 +194,3 @@ class TradeDatabase:
             'strategy': trade[8],
             'picture': trade[9]
         } if trade else None
-
