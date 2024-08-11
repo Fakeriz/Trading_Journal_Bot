@@ -3,7 +3,7 @@ import logging
 from functools import wraps
 from dotenv import load_dotenv
 from typing import Final
-
+from datetime import datetime
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram import (
@@ -11,10 +11,10 @@ from telegram import (
     InlineKeyboardButton, 
     InlineKeyboardMarkup
     )
-
+from utils.states_manager import *
 
 # Conversation states enumeration
-INIT, DATE, DATE_VALIDATION, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO, SAVE, CHECK_TRADES, CHECK_DATE_RANGE, CHECK_ID, CHECK_TICKER, CHECK_SIDE, CHECK_STATUS = range(18)
+# INIT, DATE, DATE_VALIDATION, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO, SAVE, CHECK_TRADES, CHECK_DATE_RANGE, CHECK_ID, CHECK_TICKER, CHECK_SIDE, CHECK_STATUS = range(18)
 
 # Load environment variables from a .env file
 LIST_OF_ADMINS = os.getenv('LIST_OF_ADMINS')
@@ -93,7 +93,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=chat_id,
                                    text="Please choose an option from the menu below:",
                                    reply_markup=reply_markup)
-    return INIT
+    return TradeStates.INIT
 
 
 
@@ -115,4 +115,39 @@ async def return_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.callback_query.answer()
 
     await start(update, context)
-    return INIT
+    return TradeStates.INIT
+
+
+
+def is_valid_date(date_str: str) -> bool:
+    """
+    Checks if the provided date string is in the correct format (YYYY-MM-DD) and represents a valid date.
+    
+    Args:
+        date_str (str): The date string to be validated.
+    
+    Returns:
+        bool: True if the date is valid, False otherwise.
+    """
+    try:
+        datetime.strptime(date_str, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
+
+
+def is_valid_time(time_str: str) -> bool:
+    """
+    Checks if the provided time string is in the correct format (HH:MM) and represents a valid time.
+    
+    Args:
+        time_str (str): The time string to be validated.
+    
+    Returns:
+        bool: True if the time is valid, False otherwise.
+    """
+    try:
+        datetime.strptime(time_str, '%H:%M')
+        return True
+    except ValueError:
+        return False
