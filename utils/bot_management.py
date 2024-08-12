@@ -86,7 +86,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("➕ Add New Trade", callback_data='add_new_trade')],
         [InlineKeyboardButton("📊 Check Previous Trades", callback_data='check_previous_trades')],
         [InlineKeyboardButton("📁 Export Data (CSV)", callback_data='export_csv')],
-        [InlineKeyboardButton("📁 Update a Trade", callback_data='update_trade')]
+        [InlineKeyboardButton(" Update a Trade", callback_data='update_trade')],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -111,14 +111,11 @@ async def return_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE
         int: The next state in the conversation (INIT).
     """
 
-    # chat_id = update.effective_chat.id if update.effective_chat else update.callback_query.message.chat.id
-
     if update.callback_query:
         await update.callback_query.answer()
 
     await start(update, context)
     return TradeStates.INIT
-
 
 
 def is_valid_date(date_str: str) -> bool:
