@@ -5,6 +5,10 @@ from utils.states_manager import TradeStates
 from database.database_management import TradeDatabase
 
 
+# Create a instance of TradeDatabase.
+trades_db = TradeDatabase()
+
+
 async def new_trade_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Initiates the process of adding a new trade by asking the user to select a ticker.
@@ -18,11 +22,9 @@ async def new_trade_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     query = update.callback_query
     await query.answer()
+    tickers = trades_db.get_all_tickers()
 
-    keyboard = [
-        [InlineKeyboardButton("XAUUSD", callback_data='XAUUSD')],
-        [InlineKeyboardButton("EURUSD", callback_data='EURUSD')],
-    ]
+    keyboard = [[InlineKeyboardButton(ticker, callback_data=ticker)] for ticker in tickers]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text="Please Choose Ticker's Name.", reply_markup=reply_markup)
     return TradeStates.WIN_LOSS
@@ -199,7 +201,7 @@ async def time_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
     else:
         await context.bot.send_message("Invalid date format. Please enter the date in YYYY-MM-DD format.")
         return TradeStates.DATE  # Re-ask for the date if it's incorrect
-# update.message.reply_text
+
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -240,9 +242,7 @@ async def save_trade_handler(update:Update, context:ContextTypes.DEFAULT_TYPE):
     """
     context.user_data['photo'] = update.message.photo[-1].file_id   # Store photo 
 
-    # Create a instance of TradeDatabase.
-    trades_db = TradeDatabase()
-    
+
     # Save the trade details to the database
     trade_id = trades_db.save_trade(
         date= context.user_data['date'], 
