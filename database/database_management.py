@@ -180,6 +180,16 @@ class TradeDatabase:
         conn.commit()
         conn.close()
 
+
+    def delete_all_data(self):
+        conn = sqlite3.connect(self.db.path)
+        c = conn.cursor()
+        query = """DELETE FROM trades"""
+        c.execute(query)
+        conn.commit()
+        conn.close()
+
+
     def _trade_to_dict(self, trade):
         """Convert trade tuple to dictionary."""
         return {
