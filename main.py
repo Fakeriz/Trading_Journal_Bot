@@ -35,7 +35,7 @@ def main():
                 CallbackQueryHandler(start_update_trade, pattern='^update_trade$')
             ],
             TradeStates.WIN_LOSS: [
-                CallbackQueryHandler(win_loss_handler, pattern='^(XAUUSD|EURUSD)$')
+                CallbackQueryHandler(win_loss_handler) #, pattern='^(XAUUSD|EURUSD)$'
             ],
             TradeStates.SIDE: [
                 CallbackQueryHandler(side_handler, pattern='^(Win|Loss)$')
