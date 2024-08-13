@@ -35,8 +35,8 @@ async def check_previous_trades_handler(update: Update, context: ContextTypes.DE
         [InlineKeyboardButton('By Ticker Name', callback_data='by_ticker_name')],
         [InlineKeyboardButton("By Side(Long/Short)", callback_data="by_side")],
         [InlineKeyboardButton("By Status(Win/Loss)", callback_data="by_status")]
+            ]
 
-    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
      # Ask the user how they would like to check the trades
@@ -68,7 +68,6 @@ async def check_by_date_range_handler(update: Update, context: ContextTypes.DEFA
     return CheckTradesStates.CHECK_DATE_RANGE
 
 
-
 async def check_by_trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Prompts the user to enter the trade ID for checking trades.
@@ -89,7 +88,6 @@ async def check_by_trade_id_handler(update: Update, context: ContextTypes.DEFAUL
     return CheckTradesStates.CHECK_ID
 
 
-
 async def check_by_ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Prompts the user to enter the ticker name for checking trades.
@@ -108,7 +106,6 @@ async def check_by_ticker_name_handler(update: Update, context: ContextTypes.DEF
     await query.edit_message_text(
         text="Please enter the ticker name (e.g., XAUUSD):")
     return CheckTradesStates.CHECK_TICKER
-
 
 
 async def check_by_side_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -139,7 +136,6 @@ async def check_by_side_handler(update: Update, context: ContextTypes.DEFAULT_TY
     return CheckTradesStates.CHECK_SIDE
 
 
-
 async def check_by_status_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Prompts the user to select the status (Win/Loss) for checking trades.
@@ -168,7 +164,6 @@ async def check_by_status_handler(update: Update, context: ContextTypes.DEFAULT_
         )
     
     return CheckTradesStates.CHECK_STATUS
-
 
 
 async def display_trades(update: Update, context: ContextTypes.DEFAULT_TYPE, trades):
@@ -206,7 +201,6 @@ async def display_trades(update: Update, context: ContextTypes.DEFAULT_TYPE, tra
             )
 
 
-
 async def date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Handles the user's input for date range and retrieves the trades from the database.
@@ -222,7 +216,6 @@ async def date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     trades = trades_db.get_trades_by_date_range(date_range[0], date_range[1])
     await display_trades(update, context, trades)
     return await  return_to_main_menu(update, context)
-
 
 
 async def trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -242,7 +235,6 @@ async def trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return await  return_to_main_menu(update, context)
 
 
-
 async def ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Handles the user's input for ticker name and retrieves the trades from the database.
@@ -258,7 +250,6 @@ async def ticker_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     trades = trades_db.get_trades_by_ticker(ticker_name)
     await display_trades(update, context, trades)
     return await  return_to_main_menu(update, context)
-
 
 
 async def side_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -278,7 +269,6 @@ async def side_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
     trades = trades_db.get_trades_by_side(side)
     await display_trades(update, context, trades)
     return await return_to_main_menu(update, context)
-
 
 
 async def status_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
