@@ -41,5 +41,10 @@ class CheckTradesStates(Enum):
 class UpdateTradesState(Enum):
     UPDATE_CHOICE = auto()
     TRADE_ID = auto()
+    UPDATE_FIELD_CHOICE = auto()
+    UPDATE_TICKER = auto()
+    UPDATE_STATUS = auto()
+    UPDATE_SIDE = auto()
+    UPDATE_STRATEGY = auto()
     REMOVE_TRADE_ID = auto()
     REMOVE_ALL_DATA = auto()
