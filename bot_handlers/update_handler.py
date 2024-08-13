@@ -10,7 +10,7 @@ async def start_update_trade(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.callback_query.message.reply_text("Please enter the Trade ID you want to update:")
     return UpdateTradesState.TRADE_ID
 
-async def trade_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def update_trade_by_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     trade_id = update.message.text
     trades_db = TradeDatabase()
 
