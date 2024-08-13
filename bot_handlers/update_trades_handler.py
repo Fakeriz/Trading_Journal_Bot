@@ -158,4 +158,3 @@ async def update_strategy_handler(update: Update, context: ContextTypes.DEFAULT_
 async def cancel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Update cancelled.")
     return await return_to_main_menu(update, context)
-

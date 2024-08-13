@@ -13,8 +13,6 @@ from telegram import (
     )
 from utils.states_manager import *
 
-# Conversation states enumeration
-# INIT, DATE, DATE_VALIDATION, TIME, TICKER, WIN_LOSS, SIDE, RR, PNL, STRATEGY, PHOTO, SAVE, CHECK_TRADES, CHECK_DATE_RANGE, CHECK_ID, CHECK_TICKER, CHECK_SIDE, CHECK_STATUS = range(18)
 
 # Load environment variables from a .env file
 LIST_OF_ADMINS = os.getenv('LIST_OF_ADMINS')
@@ -83,12 +81,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Define the keyboard options for the user to choose from
     keyboard = [
-        [InlineKeyboardButton("➕ Add New Trade", callback_data='add_new_trade')],
-        [InlineKeyboardButton("📊 Check Previous Trades", callback_data='check_previous_trades')],
-        [InlineKeyboardButton("📁 Export Data (CSV)", callback_data='export_csv')],
-        [InlineKeyboardButton(" Update a Trade", callback_data='update_trade')],
+        [InlineKeyboardButton("➕ Add New Trade", callback_data='add_new_trade'), InlineKeyboardButton("🔁 Check Previous Trades", callback_data='check_previous_trades')],
+        [InlineKeyboardButton("📁 Export Data (CSV)", callback_data='export_csv'), InlineKeyboardButton("🗃️ Update a Trade", callback_data='update_trade')],
     ]
-
+# 💀    📊
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Send the welcome message with the keyboard options
