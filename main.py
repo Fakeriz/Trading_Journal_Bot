@@ -95,24 +95,20 @@ def main():
             ExportStates.CUSTOM_TICKER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_custom_ticker)
             ],
-            UpdateTradesState.TRADE_ID: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, update_trade_by_id_handler)
-            ],
             UpdateTradesState.UPDATE_CHOICE: [
-                CallbackQueryHandler(update_trade_handler)
+                CallbackQueryHandler(start_update_trade, pattern='^update_trade$'),
+                CallbackQueryHandler(start_remove_trade, pattern='^remove_trade$'),
+                CallbackQueryHandler(start_remove_whole_trades, pattern='^remove_all_data$'),
             ],
-            UpdateTradesState.UPDATE_TICKER: [
-                CallbackQueryHandler(update_ticker_handler)
+            UpdateTradesState.TRADE_ID: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, update_trade_by_id_handler),
             ],
-            UpdateTradesState.UPDATE_STATUS: [
-                CallbackQueryHandler(update_status_handler)
+            UpdateTradesState.REMOVE_TRADE_ID: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, remove_trade_by_id_handler)
             ],
-            UpdateTradesState.UPDATE_SIDE: [
-                CallbackQueryHandler(update_side_handler)
-            ],
-            UpdateTradesState.UPDATE_STRATEGY: [
-                CallbackQueryHandler(update_strategy_handler)
-            ],
+            UpdateTradesState.REMOVE_ALL_DATA: [
+                CallbackQueryHandler(remove_whole_database, pattern='^confirm_remove_all_data$')
+            ]
         },
         fallbacks=[CommandHandler('cancel', cancel)]
     )
