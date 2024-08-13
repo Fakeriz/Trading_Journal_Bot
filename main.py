@@ -10,10 +10,9 @@ from utils.bot_management import logger, BOT_TOKEN, start
 from utils.states_manager import *
 from bot_handlers.add_trade import *
 from bot_handlers.check_trades import *
-from bot_handlers.update_trades_handler import *
+from bot_handlers.update_handler import *
 from database.database_management import *
 from bot_handlers.export_data import *
-from bot_handlers.update_trades_handler import *
 
 
 def main():
@@ -97,7 +96,7 @@ def main():
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_custom_ticker)
             ],
             UpdateTradesState.TRADE_ID: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, trade_id_handler)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, update_trade_by_id_handler)
             ],
             UpdateTradesState.UPDATE_CHOICE: [
                 CallbackQueryHandler(update_trade_handler)
