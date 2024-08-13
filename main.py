@@ -96,19 +96,35 @@ def main():
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_custom_ticker)
             ],
             UpdateTradesState.UPDATE_CHOICE: [
-                CallbackQueryHandler(start_update_trade, pattern='^update_trade$'),
+                CallbackQueryHandler(start_update_trade_by_id, pattern='^update_trade_by_id$'),
                 CallbackQueryHandler(start_remove_trade, pattern='^remove_trade$'),
                 CallbackQueryHandler(start_remove_whole_trades, pattern='^remove_all_data$'),
             ],
             UpdateTradesState.TRADE_ID: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, update_trade_by_id_handler),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, remove_trade_by_id_handler),
+            ],
+            UpdateTradesState.UPDATE_FIELD_CHOICE: [
+                CallbackQueryHandler(update_field_choice_handler, pattern='^update_(ticker|status|side|strategy)$'),
+            ],
+            UpdateTradesState.UPDATE_TICKER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, update_ticker_handler),
+            ],
+            UpdateTradesState.UPDATE_STATUS: [
+                CallbackQueryHandler(update_status_handler, pattern='^update_status_(Win|Loss)$'),
+            ],
+            UpdateTradesState.UPDATE_SIDE: [
+                CallbackQueryHandler(update_side_handler, pattern='^update_side_(Long|Short)$'),
+            ],
+            UpdateTradesState.UPDATE_STRATEGY: [
+                CallbackQueryHandler(update_strategy_handler, pattern='^update_strategy_(DHL|Close_NYSE|MTR|FF)$'),
             ],
             UpdateTradesState.REMOVE_TRADE_ID: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, remove_trade_by_id_handler)
             ],
             UpdateTradesState.REMOVE_ALL_DATA: [
                 CallbackQueryHandler(remove_whole_database, pattern='^confirm_remove_all_data$')
-            ]
+            ],
         },
         fallbacks=[CommandHandler('cancel', cancel)]
     )
