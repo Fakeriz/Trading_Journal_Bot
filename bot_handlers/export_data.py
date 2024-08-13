@@ -9,10 +9,6 @@ import pandas as pd
 from io import BytesIO
 
 
-
-# Define states
-# EXPORT_TICKER, EXPORT_PERIOD, CUSTOM_DATE_RANGE, CUSTOM_TICKER = range(17, 21)
-
 # Creating TradeDatabase instance
 trades_db = TradeDatabase()
 
@@ -100,7 +96,6 @@ async def export_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TY
     """
     query = update.callback_query
     await query.answer()
-
     ticker = query.data
 
     if ticker == 'choose_ticker':
