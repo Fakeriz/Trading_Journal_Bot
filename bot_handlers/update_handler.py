@@ -7,6 +7,33 @@ from utils.bot_management import return_to_main_menu
 
 
 async def start_update_trade(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    keyboard = [
+        [InlineKeyboardButton("Update a Trade", callback_data="update_trade")],
+        [InlineKeyboardButton("Remove a Trade", callback_data='remove_trade')],
+        [InlineKeyboardButton("Remove Whole Database",callback_data='remove_all_data')]
+    ]
+
+    repyly_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(
+        text = "What Would You Like To Do?",
+        reply_markup=repyly_markup
+    )
+    return UpdateTradesState.UPDATE_CHOICE
+
+async def start_update_trade_by_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Prompts the user to enter the Trade ID they want to update.
+    
+    Args:
+        update (Update): The update object that contains the callback query.
+        context (ContextTypes.DEFAULT_TYPE): The context object for the conversation.
+    
+    Returns:
+        int: The next state in the conversation (TRADE_ID).
+    """
     await update.callback_query.message.reply_text("Please enter the Trade ID you want to update:")
     return UpdateTradesState.TRADE_ID
 
@@ -37,124 +64,52 @@ async def update_trade_by_id_handler(update: Update, context: ContextTypes.DEFAU
         await update.message.reply_text("Trade ID not found. Please enter a valid Trade ID:")
         return UpdateTradesState.TRADE_ID
 
-async def update_trade_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+async def start_remove_trade(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.callback_query.message.reply_text("Please enter the Trade ID you want to remove:")
+    return UpdateTradesState.REMOVE_TRADE_ID
 
-    options = {
-        'update_ticker': ("Please select the new Ticker:", [
-            [InlineKeyboardButton("XAUUSD", callback_data='XAUUSD')],
-            [InlineKeyboardButton("EURUSD", callback_data='EURUSD')],
-            [InlineKeyboardButton("Back", callback_data='back_to_update_choice')]
-        ]),
-        'update_status': ("Please select the new Status:", [
-            [InlineKeyboardButton("Win", callback_data='Win')],
-            [InlineKeyboardButton("Loss", callback_data='Loss')],
-            [InlineKeyboardButton("Back", callback_data='back_to_update_choice')]
-        ]),
-        'update_side': ("Please select new Side:", [
-            [InlineKeyboardButton("Long", callback_data='Long')],
-            [InlineKeyboardButton("Short", callback_data='Short')],
-            [InlineKeyboardButton("Back", callback_data='back_to_update_choice')]
-        ]),
-        'update_strategy': ("Please select new Strategy:", [
-            [InlineKeyboardButton("DHL", callback_data='DHL')],
-            [InlineKeyboardButton("Close NYSE", callback_data='Close_NYSE')],
-            [InlineKeyboardButton("MTR", callback_data='MTR')],
-            [InlineKeyboardButton("FF", callback_data="FF")],
-            [InlineKeyboardButton("Back", callback_data='back_to_update_choice')]
-        ])
-    }
-
-    if query.data in options:
-        message, buttons = options[query.data]
-        await query.edit_message_text(message, reply_markup=InlineKeyboardMarkup(buttons))
-        return UpdateTradesState[query.data.upper().replace('UPDATE_', 'UPDATE_')]
-
-async def update_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    if query.data == 'back_to_update_choice':
-        await query.edit_message_text("What would you like to update?",
-                                      reply_markup=InlineKeyboardMarkup([
-                                          [InlineKeyboardButton("Ticker", callback_data='update_ticker')],
-                                          [InlineKeyboardButton("Status", callback_data='update_status')],
-                                          [InlineKeyboardButton("Side", callback_data='update_side')],
-                                          [InlineKeyboardButton("Strategy", callback_data='update_strategy')],
-                                          [InlineKeyboardButton("Cancel", callback_data='cancel_update')]
-                                      ]))
-        return UpdateTradesState.UPDATE_CHOICE
-
-    trade_id = context.user_data['trade_id']
+async def remove_trade_by_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    trade_id = update.message.text
     trades_db = TradeDatabase()
-    trades_db.update_trade(trade_id, {'ticker': query.data})
-    await query.edit_message_text(f"Ticker updated to {query.data}")
-    return ConversationHandler.END
 
-async def update_status_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+    try:
+        trade = trades_db.get_trade_by_id(trade_id)
+    except Exception as e:
+        await update.message.reply_text(f"An error occurred: {e}")
+        return UpdateTradesState.REMOVE_TRADE_ID
 
-    if query.data == 'back_to_update_choice':
-        await query.edit_message_text("What would you like to update?",
-                                      reply_markup=InlineKeyboardMarkup([
-                                          [InlineKeyboardButton("Ticker", callback_data='update_ticker')],
-                                          [InlineKeyboardButton("Status", callback_data='update_status')],
-                                          [InlineKeyboardButton("Side", callback_data='update_side')],
-                                          [InlineKeyboardButton("Strategy", callback_data='update_strategy')],
-                                          [InlineKeyboardButton("Cancel", callback_data='cancel_update')]
-                                      ]))
-        return UpdateTradesState.UPDATE_CHOICE
+    if trade:
+        try:
+            trades_db.remove_trade_by_id(trade_id)
+            await update.message.reply_text(f"Trade with ID {trade_id} has been removed.")
+        except Exception as e:
+            await update.message.reply_text(f"An error occurred: {e}")
+    else:
+        await update.message.reply_text("Trade ID not found. Please enter a valid Trade ID:")
+        return UpdateTradesState.REMOVE_TRADE_ID
 
-    trade_id = context.user_data['trade_id']
-    trades_db = TradeDatabase()
-    trades_db.update_trade(trade_id, {'status': query.data})
-    await query.edit_message_text(f"Status updated to {query.data}")
     return await return_to_main_menu(update, context)
 
-async def update_side_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+async def start_remove_whole_trades(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("Confirm", callback_data='confirm_remove_all_data')],
+        [InlineKeyboardButton("Cancel", callback_data='cancel_remove_all_data')]
+    ]
 
-    if query.data == 'back_to_update_choice':
-        await query.edit_message_text("What would you like to update?",
-                                      reply_markup=InlineKeyboardMarkup([
-                                          [InlineKeyboardButton("Ticker", callback_data='update_ticker')],
-                                          [InlineKeyboardButton("Status", callback_data='update_status')],
-                                          [InlineKeyboardButton("Side", callback_data='update_side')],
-                                          [InlineKeyboardButton("Strategy", callback_data='update_strategy')],
-                                          [InlineKeyboardButton("Cancel", callback_data='cancel_update')]
-                                      ]))
-        return UpdateTradesState.UPDATE_CHOICE
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.reply_text(
+        text="Are you sure you want to remove the whole database?",
+        reply_markup=reply_markup
+    )
+    return UpdateTradesState.REMOVE_ALL_DATA
 
-    trade_id = context.user_data['trade_id']
+async def remove_whole_database(update: Update, context: ContextTypes.DEFAULT_TYPE):
     trades_db = TradeDatabase()
-    trades_db.update_trade(trade_id, {'side': query.data})
-    await query.edit_message_text(f"Side updated to {query.data}")
-    return await return_to_main_menu(update, context)
 
-async def update_strategy_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+    try:
+        trades_db.remove_all_trades()
+        await update.callback_query.message.reply_text("The whole database has been removed.")
+    except Exception as e:
+        await update.callback_query.message.reply_text(f"An error occurred: {e}")
 
-    if query.data == 'back_to_update_choice':
-        await query.edit_message_text("What would you like to update?",
-                                      reply_markup=InlineKeyboardMarkup([
-                                          [InlineKeyboardButton("Ticker", callback_data='update_ticker')],
-                                          [InlineKeyboardButton("Status", callback_data='update_status')],
-                                          [InlineKeyboardButton("Side", callback_data='update_side')],
-                                          [InlineKeyboardButton("Strategy", callback_data='update_strategy')],
-                                          [InlineKeyboardButton("Cancel", callback_data='cancel_update')]
-                                      ]))
-        return UpdateTradesState.UPDATE_CHOICE
-
-    trade_id = context.user_data['trade_id']
-    trades_db = TradeDatabase()
-    trades_db.update_trade(trade_id, {'strategy': query.data})
-    await query.edit_message_text(f"Strategy updated to {query.data}")
-    return await return_to_main_menu(update, context)
-
-async def cancel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Update cancelled.")
     return await return_to_main_menu(update, context)
