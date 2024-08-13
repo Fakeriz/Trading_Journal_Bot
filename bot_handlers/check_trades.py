@@ -47,7 +47,6 @@ async def check_previous_trades_handler(update: Update, context: ContextTypes.DE
     return CheckTradesStates.CHECK_TRADES
 
 
-
 async def check_by_date_range_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Prompts the user to enter the date range for checking trades.
@@ -196,7 +195,7 @@ async def display_trades(update: Update, context: ContextTypes.DEFAULT_TYPE, tra
                 f"Time: {trade['time']}\n"
                 f"Ticker: {trade['ticker']}\n"
                 f"Side: {trade['side']}\n"
-                f"Status: {trade['status']}\n"
+                # f"Status: {trade['status']}\n"
                 f"RR: {trade['rr']}\n"
                 f"PnL: {trade['pnl']}\n"
                 f"Strategy: {trade['strategy']}\n"
