@@ -45,3 +45,5 @@ class UpdateTradesState(Enum):
     UPDATE_STATUS = auto()
     UPDATE_SIDE = auto()
     UPDATE_STRATEGY = auto()
+    REMOVE_TRADE = auto()
+    REMOVE_ALL_TRADES = auto()
