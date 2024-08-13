@@ -179,7 +179,21 @@ class TradeDatabase:
             c.execute(f'UPDATE trades SET {key} = ? WHERE id = ?', (value, trade_id))
         conn.commit()
         conn.close()
+    def remove_trade_by_id(self, trade_id: int):
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        query = "DELETE FROM trades WHERE id = ?"
+        c.execute(query, (trade_id,))
+        conn.commit()
+        conn.close()
 
+    def remove_all_trades(self):
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        query = "DELETE FROM trades"
+        c.execute(query)
+        conn.commit()
+        conn.close()
 
     def delete_all_data(self):
         conn = sqlite3.connect(self.db.path)
