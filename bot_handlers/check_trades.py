@@ -30,11 +30,11 @@ async def check_previous_trades_handler(update: Update, context: ContextTypes.DE
 
      # Create a keyboard with options for checking trades by different criteria
     keyboard = [
-        [InlineKeyboardButton("By Date Range", callback_data='by_date_range')],
-        [InlineKeyboardButton("By Trade ID", callback_data='by_trade_id')],
-        [InlineKeyboardButton('By Ticker Name', callback_data='by_ticker_name')],
-        [InlineKeyboardButton("By Side(Long/Short)", callback_data="by_side")],
-        [InlineKeyboardButton("By Status(Win/Loss)", callback_data="by_status")]
+        [InlineKeyboardButton("📆 By Date Range", callback_data='by_date_range')],
+        [InlineKeyboardButton("🆔 By Trade ID", callback_data='by_trade_id')],
+        [InlineKeyboardButton('🔤 By Ticker Name', callback_data='by_ticker_name')],
+        [InlineKeyboardButton("↕️ By Side(Long/Short)", callback_data="by_side")],
+        [InlineKeyboardButton("✌🏽 By Status(Win/Loss)", callback_data="by_status")]
             ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
