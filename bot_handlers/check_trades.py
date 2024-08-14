@@ -1,6 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, ContextTypes
-
+import asyncio
 from utils.bot_management import return_to_main_menu
 from utils.states_manager import CheckTradesStates
 from database.database_management import TradeDatabase
