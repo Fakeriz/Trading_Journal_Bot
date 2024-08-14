@@ -14,12 +14,6 @@ class TradeStates(Enum):
     STRATEGY = auto()
     PHOTO = auto()
     SAVE = auto()
-    CHECK_TRADES = auto()
-    CHECK_DATE_RANGE = auto()
-    CHECK_ID = auto()
-    CHECK_TICKER = auto()
-    CHECK_SIDE = auto()
-    CHECK_STATUS = auto()
 
 
 class ExportStates(Enum):
