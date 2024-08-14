@@ -99,9 +99,21 @@ async def export_ticker_handler(update: Update, context: ContextTypes.DEFAULT_TY
     ticker = query.data
 
     if ticker == 'choose_ticker':
-        # Ask the user to enter the ticker name
-        await query.message.reply_text("Please enter the ticker name (e.g., XAUUSD):")
+        # Retrieve all tickers from the database
+        tickers = trades_db.get_all_tickers()
+
+        if not tickers:
+            await query.message.reply_text("No tickers found in the database.")
+            return await return_to_main_menu(update, context)
+
+        # Create a keyboard with ticker names
+        keyboard = [[InlineKeyboardButton(ticker, callback_data=ticker)] for ticker in tickers]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        # Ask the user to select a ticker
+        await query.message.reply_text("Please choose a ticker to export records:", reply_markup=reply_markup)
         return ExportStates.CUSTOM_TICKER
+
     else:
         # Handle the 'all_trades' option
         period = context.user_data['period']
@@ -123,13 +135,16 @@ async def handle_custom_ticker(update: Update, context: ContextTypes.DEFAULT_TYP
     Returns:
         int: Ends the conversation.
     """
-    ticker = update.message.text
-    period = context.user_data['period']
+    query = update.callback_query
+    await query.answer()
+    ticker = query.data
+
+    period = context.user_data.get('period')
     start_date, end_date = get_date_range_from_period(period)
     
     trades = trades_db.get_trades_for_export(ticker, period, start_date=start_date, end_date=end_date)
     await export_to_csv(update, context, trades, ticker, period)
-    await update.message.reply_text("Data exported successfully.")
+    await query.message.reply_text("Data exported successfully.")
     return await  return_to_main_menu(update, context)
 
 
