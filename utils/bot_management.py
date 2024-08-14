@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from typing import Final
 from datetime import datetime
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, CallbackContext
 from telegram import (
     Update, 
     InlineKeyboardButton, 
@@ -84,7 +84,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("➕ Add New Trade", callback_data='add_new_trade'), InlineKeyboardButton("🔁 Check Previous Trades", callback_data='check_previous_trades')],
         [InlineKeyboardButton("📁 Export Data (CSV)", callback_data='export_csv'), InlineKeyboardButton("🗃️ Update Journal", callback_data='update_trade')],
     ]
-# 💀    📊
+#     📊
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Send the welcome message with the keyboard options
