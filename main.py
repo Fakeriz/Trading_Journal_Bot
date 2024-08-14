@@ -93,7 +93,7 @@ def main():
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_custom_date_range)
             ],
             ExportStates.CUSTOM_TICKER: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_custom_ticker)
+                CallbackQueryHandler(handle_custom_ticker)
             ],
             UpdateTradesState.UPDATE_CHOICE: [
                 CallbackQueryHandler(start_update_trade_by_id, pattern='^update_trade_by_id$'),
@@ -125,6 +125,7 @@ def main():
             UpdateTradesState.REMOVE_ALL_DATA: [
                 CallbackQueryHandler(remove_whole_database, pattern='^confirm_remove_all_data$')
             ],
+    
         },
         fallbacks=[CommandHandler('cancel', cancel)]
     )
