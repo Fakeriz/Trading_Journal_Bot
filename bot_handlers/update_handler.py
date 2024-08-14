@@ -24,9 +24,9 @@ async def start_update_trade(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await query.answer()
 
     keyboard = [
-        [InlineKeyboardButton("Update a Trade", callback_data="update_trade_by_id")],
-        [InlineKeyboardButton("Remove a Trade", callback_data='remove_trade')],
-        [InlineKeyboardButton("Remove Whole Database", callback_data='remove_all_data')]
+        [InlineKeyboardButton("🗃️ Update a Trade", callback_data="update_trade_by_id")],
+        [InlineKeyboardButton("✐ Remove a Trade", callback_data='remove_trade')],
+        [InlineKeyboardButton("💀 Remove Whole Database", callback_data='remove_all_data')]
     ]
     # Display the keyboard to the user.
     repyly_markup = InlineKeyboardMarkup(keyboard)
@@ -312,8 +312,8 @@ async def start_remove_whole_trades(update: Update, context: ContextTypes.DEFAUL
         int: The next state in the conversation (REMOVE_ALL_DATA).
     """
     keyboard = [
-        [InlineKeyboardButton("Confirm", callback_data='confirm_remove_all_data')],
-        [InlineKeyboardButton("Cancel", callback_data='cancel_remove_all_data')]
+        [InlineKeyboardButton("👍🏼 Confirm", callback_data='confirm_remove_all_data')],
+        [InlineKeyboardButton("⛔ Cancel", callback_data='cancel_remove_all_data')]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
