@@ -24,7 +24,7 @@ To run this bot, you will need:
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/mohammadreza-mohammadi94/Trading_Journal_Bot.git
+    git clone https://github.com/Fakeriz/Trading_Journal_Bot.git
     cd Trading_Journal_Bot
     ```
 
